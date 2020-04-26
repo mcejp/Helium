@@ -338,8 +338,8 @@ namespace Helium
     {
         Token* tok;
 
-        if ( ( tok = accept( Token_nul ) ) )
-            return make_pooled<AstNodeLiteral>( AstNodeLiteral::Type::nul, tok->span );
+        if ( ( tok = accept( Token_nil ) ) )
+            return make_pooled<AstNodeLiteral>( AstNodeLiteral::Type::nil, tok->span );
         else if ( ( tok = accept( Token_integer ) ) )
         {
             return make_pooled<AstNodeLiteralInteger>(tok->integerValue, tok->span);
@@ -886,7 +886,7 @@ namespace Helium
             auto expression = parseExpression();
 
             if ( !expression )
-                expression = make_pooled<AstNodeLiteral>(AstNodeLiteral::Type::nul, span);
+                expression = make_pooled<AstNodeLiteral>(AstNodeLiteral::Type::nil, span);
 
             accept( Token_semicolon );
 

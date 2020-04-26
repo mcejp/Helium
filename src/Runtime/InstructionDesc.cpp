@@ -35,7 +35,7 @@ static const InstructionDesc descs[] = {
     {Opcodes::lor,          "lor",          OperandType::none},
     //{Opcodes::lxor,         "lxor",          OperandType::none},
 
-    {Opcodes::pushnul,      "pushnul",      OperandType::none},
+    {Opcodes::pushnil,      "pushnil",      OperandType::none},
     {Opcodes::pushc_b,      "pushc.b",      OperandType::integer},
     {Opcodes::pushc_f,      "pushc.f",      OperandType::real},
     {Opcodes::pushc_i,      "pushc.i",      OperandType::integer},

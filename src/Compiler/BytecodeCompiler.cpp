@@ -52,8 +52,8 @@ namespace Helium
                 return ValueRef::makeInteger(integer->value);
             }
 
-            case AstNodeLiteral::Type::nul:
-                return ValueRef::makeNul();
+            case AstNodeLiteral::Type::nil:
+                return ValueRef::makeNil();
 
             case AstNodeLiteral::Type::object:
                 helium_assert(literal->literalType != AstNodeLiteral::Type::object);
@@ -1320,8 +1320,8 @@ namespace Helium
                 emitInteger(Opcodes::pushc_i, static_cast<const AstNodeLiteralInteger*>(node)->value, node->span);
                 return true;
 
-            case AstNodeLiteral::Type::nul:
-                emit(Opcodes::pushnul, node->span);
+            case AstNodeLiteral::Type::nil:
+                emit(Opcodes::pushnil, node->span);
                 return true;
 
             case AstNodeLiteral::Type::object: {

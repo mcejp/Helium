@@ -59,18 +59,18 @@ namespace Helium
     Value Value::reference() const
     {
 #if HELIUM_TRACE_VALUES
-        if (type != ValueType::undefined) {
+        if (type != ValueType::invalid) {
             ValueTrace::trackReferenced(*this, nextRefId);
         }
 #endif
 
         switch ( type )
         {
-            case ValueType::undefined:
-                return undefined();
+            case ValueType::invalid:
+                return newInvalid();
 
-            case ValueType::nul:
-                return newNul();
+            case ValueType::nil:
+                return newNil();
 
         case ValueType::boolean:
             return newBoolean(booleanValue);
@@ -113,13 +113,13 @@ namespace Helium
     void Value::release()
     {
 #if HELIUM_TRACE_VALUES
-        if (type != ValueType::undefined) {
+        if (type != ValueType::invalid) {
             ValueTrace::trackReleased(*this);
         }
 #endif
 
         switch (type) {
-        case ValueType::undefined:
+        case ValueType::invalid:
             return;
 
         case ValueType::list:
@@ -170,7 +170,7 @@ namespace Helium
             }
             break;
 
-        case ValueType::nul:
+        case ValueType::nil:
         case ValueType::boolean:
         case ValueType::integer:
         case ValueType::internal:
@@ -181,7 +181,7 @@ namespace Helium
             break;
         }
 
-        type = ValueType::undefined;
+        type = ValueType::invalid;
     }
 
     Value Value::replicate() const
@@ -208,8 +208,8 @@ namespace Helium
 
         switch ( type )
         {
-        case ValueType::undefined:
-            printf("undefined");
+        case ValueType::invalid:
+            printf("invalid");
             break;
 
             case ValueType::boolean:
@@ -220,8 +220,8 @@ namespace Helium
                 printf( "%" PRId64, static_cast<int64_t>(integerValue) );
                 break;
 
-            case ValueType::nul:
-                printf( "nul" );
+            case ValueType::nil:
+                printf( "nil" );
                 break;
 
             case ValueType::real:
@@ -301,7 +301,7 @@ namespace Helium
 
     void Value::unregister()
     {
-        helium_assert(this->type != ValueType::undefined);
+        helium_assert(this->type != ValueType::invalid);
 
 #if HELIUM_TRACE_VALUES
         ValueTrace::trackDestroyed(*this);
@@ -309,7 +309,7 @@ namespace Helium
 
         numExistingVars--;
 
-        this->type = ValueType::undefined;
+        this->type = ValueType::invalid;
     }
 
     /* LISTS ******************************************************************
@@ -332,7 +332,7 @@ namespace Helium
         var->list->numReferences = 1;
 
         if ( var->list->items == nullptr ) {
-            return undefined();
+            return newInvalid();
         }
 
         var->register_();
@@ -434,7 +434,7 @@ namespace Helium
         var->object->numReferences = 1;
 
         if ( var->object->members == nullptr ) {
-            return undefined();
+            return newInvalid();
         }
 
         var->register_();
@@ -513,7 +513,7 @@ namespace Helium
         if (index >= 0)
             return object->members[index].value.reference();
         else
-            return undefined();
+            return newInvalid();
     }
 
     Value::ObjectSetPropertyResult Value::objectSetProperty( const VMString& name, Value valueRef, bool readOnly )
@@ -762,12 +762,12 @@ namespace Helium
         case ValueType::internal: return "internal";
         case ValueType::list: return "list";
         case ValueType::nativeFunction: return "nativeFunction";
-        case ValueType::nul: return "nul";
+        case ValueType::nil: return "nil";
         case ValueType::object: return "object";
         case ValueType::real: return "real";
         case ValueType::scriptFunction: return "scriptFunction";
         case ValueType::string: return "string";
-        case ValueType::undefined: return "undefined";
+        case ValueType::invalid: return "invalid";
         }
 
         helium_abort_expression(t != t);

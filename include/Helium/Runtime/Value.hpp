@@ -12,12 +12,14 @@ namespace Helium
     typedef double      Real_t;             // real variables
     typedef uint64_t    VarId_t;            // used for lifetime tracking
 
+    // Note that there is code (mainly in the Value class) that assumes a Value can be intialized by memsetting to 0
+    // That implies that 0 should correspond to ValueType::invalid
     enum class ValueType {
-        undefined,                  // sentinel value type -- access causes an error
-                                    // TODO: consider renaming to *invalid*
+        // sentinel value type -- access causes an exception
+        invalid,
 
         // primitive types
-        nul,                        // TODO: rename to *null*, *nil*, or *none*
+        nil,
         boolean,
         integer,
         real,                       // TODO: rename to *float* because that's what it really is
@@ -114,16 +116,16 @@ namespace Helium
         static void printStatistics();
         //static void resetStatistics();
 
-        static Value undefined() {
+        static Value newInvalid() {
             Value var;
-            var.type = ValueType::undefined;
+            var.type = ValueType::invalid;
             return var;
         }
 
-        static Value newNul()
+        static Value newNil()
         {
             Value var;
-            var.type = ValueType::nul;
+            var.type = ValueType::nil;
             var.register_();
             return var;
         }
@@ -197,7 +199,7 @@ namespace Helium
         Value replicate() const;
 
         //bool isNul() const { return type == ValueType::nul; }
-        bool isUndefined() const { return type == ValueType::undefined; }
+        bool isUndefined() const { return type == ValueType::invalid; }
         bool isList() const { return type == ValueType::list; }
         bool isObject() const { return type == ValueType::object; }
 
@@ -284,7 +286,7 @@ namespace Helium
     class ValueRef
     {
     public:
-        ValueRef() : value{Value::undefined()} {
+        ValueRef() : value{Value::newInvalid()} {
         }
 
         ValueRef(ValueRef&& other) noexcept : value(other.detach()) {
@@ -313,7 +315,7 @@ namespace Helium
 
         Value detach() {
             Value value = this->value;
-            this->value.type = ValueType::undefined;
+            this->value.type = ValueType::invalid;
             return value;
         }
 
@@ -333,8 +335,8 @@ namespace Helium
             return ValueRef{Value::newNativeFunction(nativeFunction)};
         }
 
-        static ValueRef makeNul() {
-            return ValueRef{Value::newNul()};
+        static ValueRef makeNil() {
+            return ValueRef{Value::newNil()};
         }
 
         static ValueRef makeReal(Real_t value) {
@@ -359,7 +361,7 @@ namespace Helium
 
         void reset() {
             value.release();
-            value.type = ValueType::undefined;
+            value.type = ValueType::invalid;
         }
 
         void reset(Value valueRef) {

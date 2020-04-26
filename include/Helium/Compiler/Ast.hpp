@@ -170,7 +170,7 @@ namespace Helium
         enum class Type {
             boolean,
             integer,
-            nul,
+            nil,
             object,
             real,
             string,

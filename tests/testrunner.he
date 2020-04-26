@@ -81,7 +81,7 @@ class TestRunner {
         catch ex
             print(ex);
             this.testFailed(test, 'didn''t compile');
-            return nul;
+            return nil;
 }
 
 class ProgramExit {

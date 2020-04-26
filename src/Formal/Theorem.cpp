@@ -55,7 +55,7 @@ bool expressionEqualsTo(const AstNodeExpression& a, const AstNodeExpression& b) 
                     return static_cast<const AstNodeLiteralInteger&>(a_literal).value
                            == static_cast<const AstNodeLiteralInteger&>(b_literal).value;
 
-                case AstNodeLiteral::Type::nul:
+                case AstNodeLiteral::Type::nil:
                     return true;
 
                 case AstNodeLiteral::Type::object:

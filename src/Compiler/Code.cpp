@@ -27,7 +27,7 @@ namespace Helium
             stream->writeLE<int64_t>(var.integerValue);
             break;
 
-        case ValueType::nul:
+        case ValueType::nil:
             break;
 
         case ValueType::real:
@@ -73,7 +73,7 @@ namespace Helium
             return true;
         }
 
-        case ValueType::nul:
+        case ValueType::nil:
             *varRef_out = Variable::newNul();
             return true;
 

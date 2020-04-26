@@ -12,7 +12,7 @@ namespace Helium
 
         //* Primitives & constants
         Token_integer,
-		Token_nul,
+		Token_nil,
         Token_literalBool,          // added for Brave (16.08.17)
         Token_number,
         Token_string,

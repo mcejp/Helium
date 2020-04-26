@@ -25,8 +25,8 @@ namespace Helium
     {
         switch ( var.type )
         {
-            case ValueType::nul:
-                return "nul";
+            case ValueType::nil:
+                return "nil";
 
             case ValueType::integer:
                 return std::to_string(var.integerValue);

@@ -34,7 +34,7 @@ Simple! Using CMake:
 - nativeFunction
 - scriptFunction
 - internal
-- nul
+- nil
 
 ### Implicit conversion rules
 
@@ -46,7 +46,7 @@ Simple! Using CMake:
 - nativeFunction to boolean (true)
 - scriptFunction to boolean (true)
 - internal to boolean (true)
-- nul to boolean (false)
+- nil to boolean (false)
 
 ## Notes
 

@@ -44,7 +44,7 @@ class Font {
 
         -- ugh! needs proper hashtable.
         for i = 0, i = i + 1 while i < 256
-            glyphs.add(nul);
+            glyphs.add(nil);
 
         font = drv.ttf.openFont(path, 14);
 
@@ -65,8 +65,8 @@ class Font {
 
 class SdlVideoDriver {
     member sdl, ttf;
-    member window = nul;
-    member surf = nul;
+    member window = nil;
+    member surf = nil;
 
     constructor()
         print('SDL video driver');

@@ -548,8 +548,8 @@ namespace Helium
                     break;
                 }
 
-                case Opcodes::pushnul:
-                    ctx.stack.push( ValueRef::makeNul() );
+                case Opcodes::pushnil:
+                    ctx.stack.push(ValueRef::makeNil() );
                     break;
 
                 case Opcodes::ret: {

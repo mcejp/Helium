@@ -56,7 +56,7 @@ namespace Helium
             land, lnot, lor,
 
             // Stack
-            pushnul,    // push nul
+            pushnil,    // push nil
             pushc_b,    // push boolean literal
             pushc_f,    // push const float
             pushc_i,    // push integer literal

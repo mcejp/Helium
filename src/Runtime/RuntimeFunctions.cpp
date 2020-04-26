@@ -16,11 +16,10 @@ namespace Helium
         helium_assert_debug(ActivationContext::getCurrentOrNull() != nullptr);
 
         switch ( value.type ) {
-        case ValueType::undefined:
-            helium_assert(value.type != ValueType::undefined);
-            return false;
+        case ValueType::invalid:
+            helium_abort_expression(value.type != ValueType::invalid);
 
-        case ValueType::nul:
+        case ValueType::nil:
             *value_out = false;
             return true;
 
@@ -145,7 +144,7 @@ namespace Helium
 
     bool RuntimeFunctions::getProperty(Value object, const VMString& name, ValueRef* value_out, bool raiseIfNotExists) {
         helium_assert_debug(ActivationContext::getCurrentOrNull() != nullptr);
-        helium_assert_debug(object.type != ValueType::undefined);
+        helium_assert_debug(object.type != ValueType::invalid);
 
         switch (object.type) {
         case ValueType::object: {
@@ -472,8 +471,8 @@ namespace Helium
 
     bool RuntimeFunctions::operatorEquals(Value left, Value right, bool* result_out) {
         helium_assert_debug(ActivationContext::getCurrentOrNull() != nullptr);
-        helium_assert_debug(left.type != ValueType::undefined);
-        helium_assert_debug(right.type != ValueType::undefined);
+        helium_assert_debug(left.type != ValueType::invalid);
+        helium_assert_debug(right.type != ValueType::invalid);
 
         if ( left.type != right.type ) {
             *result_out = false;
@@ -481,11 +480,10 @@ namespace Helium
         }
 
         switch ( left.type ) {
-        case ValueType::undefined:
-            helium_assert(left.type != ValueType::undefined);
-            break;
+        case ValueType::invalid:
+            helium_abort_expression(left.type != ValueType::invalid);
 
-        case ValueType::nul:
+        case ValueType::nil:
             *result_out = true;
             break;
 

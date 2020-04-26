@@ -72,7 +72,7 @@ namespace Helium
     }
 
     void ActivationContext::callNativeFunction(NativeFunction func, size_t numArgs) {
-        NativeFunctionContext ctx{ *this, numArgs, ValueRef::makeNul() };
+        NativeFunctionContext ctx{ *this, numArgs, ValueRef::makeNil() };
         func(ctx);
 
         for (size_t i = 0; i < numArgs; i++)
@@ -85,7 +85,7 @@ namespace Helium
         this->stack.push(ValueRef::makeReference(self));
         numArgs++;
 
-        NativeFunctionContext ctx{ *this, numArgs, ValueRef::makeNul() };
+        NativeFunctionContext ctx{ *this, numArgs, ValueRef::makeNil() };
         func(ctx);
 
         for (size_t i = 0; i < numArgs; i++)

@@ -62,7 +62,7 @@ namespace Helium
     template <class C>
     bool wrapPointer(C* ptr, ValueRef* value_out) {
         if (ptr == nullptr) {
-            *value_out = ValueRef::makeNul();
+            *value_out = ValueRef::makeNil();
             return true;
         }
 
@@ -73,7 +73,7 @@ namespace Helium
     template <class C>
     bool wrapNewDelete(C* ptr, ValueRef* value_out) {
         if (ptr == nullptr) {
-            *value_out = ValueRef::makeNul();
+            *value_out = ValueRef::makeNil();
             return true;
         }
 
@@ -105,7 +105,7 @@ namespace Helium
     template <class C>
     bool wrapNonOwning(C* ptr, ValueRef* value_out) {
         if (ptr == nullptr) {
-            *value_out = ValueRef::makeNul();
+            *value_out = ValueRef::makeNil();
             return true;
         }
 

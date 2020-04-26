@@ -41,7 +41,7 @@ AstNodeList (AstNodeExpression)
 - item : [AstNodeExpression]
 
 AstNodeLiteral
-- type : {boolean, integer, nul, object, real, string}
+- type : {boolean, integer, nil, object, real, string}
 
 AstNodeLiteralObject (AstNodeLiteral)
 - properties : [pair<string, AstNodeExpression>]

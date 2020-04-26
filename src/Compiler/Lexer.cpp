@@ -326,7 +326,7 @@ namespace Helium
         { "iterate",    Token_iterate },
         { "local",      Token_local },
         { "member",     Token_member },
-        { "nul",        Token_nul },
+        { "nil",        Token_nil },
         { "private",    Token_private },
         { "return",     Token_return },
         { "switch",     Token_switch },
