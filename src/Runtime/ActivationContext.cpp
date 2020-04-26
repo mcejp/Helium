@@ -60,7 +60,6 @@ namespace Helium
 
         const auto& function = this->activeModule->functions[functionIndex];
         this->pc = function.start;
-        this->numArgs = numArgs;
 
         frame->scriptFunction = &function;
         frame->stackBase = stack.getHeight();

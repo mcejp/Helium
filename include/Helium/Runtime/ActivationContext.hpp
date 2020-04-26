@@ -137,7 +137,6 @@ namespace Helium
             VMModule* activeModule = nullptr;
             ModuleIndex_t activeModuleIndex = -1;
             CodeAddr_t pc = -1;
-            size_t numArgs = -1;
 
             ValueRef exception;
 
