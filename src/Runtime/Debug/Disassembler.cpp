@@ -8,6 +8,7 @@
 
 namespace Helium
 {
+    using fmt::format;
     using stx::optional;
     using std::string;
 
@@ -43,20 +44,20 @@ namespace Helium
 
     void Disassembler::disassemble(Script const& script, LineSink const& output)
     {
-        output(fmt::format("; {} functions in module", script.functions.size()));
+        output(format("; {} functions in module", script.functions.size()));
 
         for (size_t i = 0; i < script.functions.size(); i++) {
-            output(fmt::format("def `{}` at {:04X}h length {:04X}h\t; {:3d}, exported: {:5}, {} explicit arguments, {} exception handlers",
+            output(format("def `{}` at {:04X}h length {:04X}h\t; {:3d}, exported: {:5}, {} explicit arguments, {} exception handlers",
                                script.functions[i].name, script.functions[i].start, script.functions[i].length,
                                i, script.functions[i].exported, script.functions[i].numExplicitArguments, script.functions[i].exceptionHandlers.size()
                                ));
         }
 
         output("");
-        output(fmt::format("; {} dependencies", script.dependencies.size()));
+        output(format("; {} dependencies", script.dependencies.size()));
 
         for (size_t i = 0; i < script.dependencies.size(); i++) {
-            output(fmt::format("import `{}`\t; {:3d}", script.dependencies[i], i));
+            output(format("import `{}`\t; {:3d}", script.dependencies[i], i));
         }
 
         output("");
@@ -99,15 +100,12 @@ namespace Helium
             }
 
             std::stringstream ss;
-
-            snprintf( buffer, sizeof( buffer ), " %04zX (%02X)\t", pc, current->opcode );
-            ss << buffer;
+            ss << format("{:04x}\t{:02x}\t", pc, current->opcode);
 
             auto desc = InstructionDesc::getByOpcode(current->opcode);
 
             if (!desc) {
-                snprintf( buffer, sizeof( buffer ), "%02Xh", current->opcode );
-                ss << "Unknown instruction opcode " << buffer << "!";
+                ss << format("Unknown instruction opcode {:02x}h!", current->opcode);
                 output( ss.str() );
                 continue;
             }
@@ -175,7 +173,7 @@ namespace Helium
                 case OperandType::switchTable:
                 {
                     output(ss.str());
-                    ss.clear();
+                    std::stringstream().swap(ss);
 
                     auto switchTable = script.switchTables[current->switchTableIndex];
 
@@ -191,7 +189,7 @@ namespace Helium
                         snprintf( buffer, sizeof( buffer ), "%04Xh", switchTable->handlers[i] );
                         ss << " : " << buffer;
                         output(ss.str());
-                        ss.clear();
+                        std::stringstream().swap(ss);
                     }
 
                     break;
@@ -203,13 +201,13 @@ namespace Helium
 
         output("");
 
-        output(fmt::format("; {} strings", script.stringPool.size()));
+        output(format("; {} strings", script.stringPool.size()));
 
         for (size_t i = 0; i < script.stringPool.size(); i++) {
             const auto& string = script.stringPool[i];
             auto sv = std::string_view(reinterpret_cast<const char*>(string.data()), string.size());
 
-            output(fmt::format("string '{}'\t; {:3d}", sv, i));
+            output(format("string '{}'\t; {:3d}", sv, i));
         }
     }
 }
