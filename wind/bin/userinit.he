@@ -1,0 +1,6 @@
+print('UserInit v1.0');
+
+_global.videoDriver.setMode(1280, 800);
+
+while true
+    _global.self_ctx.suspend();

@@ -1,0 +1,4 @@
+iterate a in (1, 2)
+    continue;
+
+    throw 'unreachable code executed';

@@ -1,0 +1,95 @@
+class TestRunner {
+    member compiler, vm;
+
+    member testsRan = 0, testsFailed = 0;
+
+    constructor()
+        compiler = Compiler();
+        vm = getVM();
+
+    report()
+        print();
+        print('-------------------------------------------');
+        print('tests ran: ' + testsRan + ', tests FAILED: ' + testsFailed);
+
+    runAll()
+        sources = sourcesInDirectory('must-succeed');
+
+        iterate test in sources
+            print(test);
+            script = this.tryCompileTest(test);
+
+            if script
+                module = vm.loadModule(script);
+
+                ctx = ActivationContext(vm);
+                ctx.callMainFunction(module);
+                ctx.resume();
+                vm.execute(ctx);
+
+                if ctx.getState() == ctx.raisedException
+                    print(ctx.getException());
+                    this.testFailed(test, 'threw an exception');
+                else
+                    this.testSuccessful(test);
+
+        sources = sourcesInDirectory('must-throw-exception');
+
+        iterate test in sources
+            print(test);
+            script = this.tryCompileTest(test);
+
+            if script
+                module = vm.loadModule(script);
+
+                ctx = ActivationContext(vm);
+                ctx.callMainFunction(module);
+                ctx.resume();
+                vm.execute(ctx);
+
+                if ctx.getState() == ctx.raisedException
+                    this.testSuccessful(test);
+                else
+                    this.testFailed(test, 'didn''t throw an exception (getState = ' + ctx.getState() + ')');
+
+        this.report();
+
+        return testsFailed == 0
+
+    sourcesInDirectory(path)
+        sources = ();
+        files = _listDirectory(path);
+
+        iterate file in files
+            if file.endsWith('.he')
+                sources.add(path + '/' + file);
+
+        return sources;
+
+    testFailed(name, message)
+        print('FAIL: ', name, ' ', message);
+        testsFailed = testsFailed + 1;
+        testsRan = testsRan + 1;
+
+    testSuccessful(name)
+        testsRan = testsRan + 1;
+
+    tryCompileTest(test)
+        try
+            script = compiler.compileFile(test);
+            return script;
+        catch ex
+            print(ex);
+            this.testFailed(test, 'didn''t compile');
+            return nul;
+}
+
+class ProgramExit {
+    member exitCode;
+
+    constructor(theCode)
+        exitCode = theCode;
+}
+
+if !TestRunner().runAll()
+    throw ProgramExit(1)

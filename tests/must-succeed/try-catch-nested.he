@@ -1,0 +1,53 @@
+try
+    try
+        throw 'foo';
+        assert false;
+    catch x
+        assert x == 'foo';
+
+    try
+        throw 'bar';
+        assert false;
+    catch x
+        assert x == 'bar';
+
+    throw 'hello';
+    assert false;
+catch x
+    assert x == 'hello';
+
+try
+    try
+        throw 'foo';
+        assert false;
+    catch x
+        assert x == 'foo';
+
+    throw 'hello';
+    assert false;
+
+    try
+        throw 'bar';
+        assert false;
+    catch x
+        assert x == 'bar';
+catch x
+    assert x == 'hello';
+
+try
+    throw 'hello';
+    assert false;
+
+    try
+        throw 'foo';
+        assert false;
+    catch x
+        assert x == 'foo';
+
+    try
+        throw 'bar';
+        assert false;
+    catch x
+        assert x == 'bar';
+catch x
+    assert x == 'hello'

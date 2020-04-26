@@ -1,0 +1,5 @@
+try
+    throw 'hello';
+    assert false;
+catch x
+    assert x == 'hello'

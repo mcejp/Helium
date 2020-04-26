@@ -1,0 +1,9 @@
+list = ();
+
+for i = 10, i = i + 10 while i < 40
+    list.add(i);
+
+assert list.length == 3;
+assert list[0] == 10;
+assert list[1] == 20;
+assert list[2] == 30;

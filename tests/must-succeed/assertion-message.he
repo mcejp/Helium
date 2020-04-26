@@ -1,0 +1,4 @@
+try
+    assert false;
+catch e
+    assert e.desc == 'failed assertion `false`';

@@ -1,0 +1,8 @@
+/.idea/
+/.vs/
+/cmake-build-*/
+/doxygen/
+/vcxproj/
+
+.helium_disassembly/
+.helium_value_trace

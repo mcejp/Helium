@@ -1,0 +1,5 @@
+local a = 'foo';
+local b = 'bar';
+
+if a + b != 'foobar'
+    throw 'unexpected result';

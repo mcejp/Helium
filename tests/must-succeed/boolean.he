@@ -1,0 +1,17 @@
+foo = true;
+assert foo;
+assert foo == true;
+
+foo = false;
+assert !foo;
+assert foo == false;
+
+assert true && true;
+assert !(true && false);
+assert !(false && true);
+assert !(false && false);
+
+assert true || true;
+assert true || false;
+assert false || true;
+assert !(false || false);

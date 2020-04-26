@@ -1,0 +1,2 @@
+if !${}
+    throw 'unreachable code'

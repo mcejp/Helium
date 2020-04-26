@@ -1,0 +1,6 @@
+function sum(a: Int, b: Int) {
+    return a + b;
+}
+
+if sum(1, 2) != 3
+    throw 'unexpected result';

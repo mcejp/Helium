@@ -1,0 +1,19 @@
+switch 2
+    0, 1, 2, 3, 4:
+        assert true;
+
+    5:
+        assert false;
+
+    else:
+        assert false;
+
+switch 5
+    0, 1, 2, 3, 4:
+        assert false;
+
+    5:
+        assert true;
+
+    else:
+        assert false;

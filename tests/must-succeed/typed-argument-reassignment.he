@@ -1,0 +1,7 @@
+function sum(a: Int, b: Int) {
+    b = 2;
+    return a + b;
+}
+
+if sum(1, 20) != 3
+    throw 'unexpected result';

@@ -1,0 +1,76 @@
+class Process {
+    member vm, path, ctx;
+
+    member isRunning;
+
+    constructor(vm, path, script)
+        this.vm = vm;
+        this.path = path;
+
+        module = vm.loadModule(script);
+
+        ctx = ActivationContext(vm);
+        ctx.callMainFunction(module);
+
+        isRunning = true;
+
+    run()
+        _global.self_ctx = ctx;
+        ctx.resume();
+        vm.execute(ctx);
+
+        if ctx.getState() == 2
+            isRunning = false;
+
+        if ctx.getState() == 3
+            exception = ctx.getException();
+            print('Process "', path, '" quit with an exception: ', exception);
+            isRunning = false;
+}
+
+class Kernel {
+    member compiler;
+    member vm;
+
+    member processes = ();
+    member shuttingDown = false;
+
+    constructor()
+        print('wind OS kernel~');
+
+        compiler = Compiler();
+        print('compiler version: ', compiler.getVersion());
+
+        if compiler.isMixedMode
+            print('compiler mode: mixed');
+        else
+            print('compiler mode: dynamic');
+
+        vm = getVM();
+
+    executeProcess(path)
+        script = compiler.compileFile(path + '.he');
+        p = Process(vm, path, script);
+        --print('this: ', this);
+        --print('processes: ', processes);
+        processes.add(p);
+
+    run()
+        while !shuttingDown && processes.length > 0
+            for idx = processes.length - 1, idx = idx - 1 while idx >= 0
+                processes[idx].run();
+
+                if !processes[idx].isRunning
+                    processes.remove(idx);
+
+            --processes = ();
+
+    shutdown()
+        shuttingDown = true;
+}
+
+k = Kernel();
+_global.kernel = k;
+k.executeProcess('bin/userinit');
+k.executeProcess('bin/video');
+k.run();

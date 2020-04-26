@@ -1,0 +1,120 @@
+class Window {
+    member x, y, w, h;
+    member titleHeight = 20;
+
+    constructor(x: Int, y: Int, w: Int, h: Int)
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+
+        drv = _global.videoDriver;
+        this.font = drv.openFont('packages/desktop/Calibre-Medium.ttf', 14);
+
+    draw()
+        drv = _global.videoDriver;
+        --drv.sdl.setRenderDrawColor(drv.renderer, 255, 255, 255, 255);
+        drv.sdl.fillRect(drv.surf, x, y - titleHeight, w, titleHeight, #ff4080c0);
+        drv.sdl.fillRect(drv.surf, x, y, w, h, #ffffffff);
+
+        this.font.drawString('wind OS loader', x + 8, y - titleHeight + 4);
+}
+
+class WindowManager {
+    member windows = ();
+
+    createWindow(x: Int, y: Int, w: Int, h: Int)
+        window = Window(x, y, w, h);
+        windows.add(window);
+        return window;
+
+    drawAll()
+        iterate window in windows
+            window.draw();
+}
+
+class Font {
+    member drv;
+    member font;
+
+    member glyphs = ();     -- ugh!!
+
+    constructor(drv, path, size)
+        this.drv = drv;
+
+        -- ugh! needs proper hashtable.
+        for i = 0, i = i + 1 while i < 256
+            glyphs.add(nul);
+
+        font = drv.ttf.openFont(path, 14);
+
+    drawString(str, x, y)
+        iterate ch in str
+            surf = this.getGlyph(ch);
+            drv.sdl.blitSurface(surf, 0, 0, surf.w, surf.h, drv.surf, x, y);
+            x = x + surf.w;
+            --print(surf);
+
+    getGlyph(ch)
+        if !glyphs[ch]
+            glyphs[ch] = drv.ttf.renderGlyphBlended(font, ch, 255, 255, 255, 255);
+            return glyphs[ch];
+
+        return glyphs[ch];
+}
+
+class SdlVideoDriver {
+    member sdl, ttf;
+    member window = nul;
+    member surf = nul;
+
+    constructor()
+        print('SDL video driver');
+
+        sdl = SDL2();
+        sdl.init(sdl.INIT_VIDEO);
+
+        ttf = SDL2_ttf();
+        ttf.init();
+
+        this.wm = WindowManager();
+
+    handleEvents()
+        while true
+            event = sdl.pollEvent();
+
+            if !event
+                return;
+
+            --print(event);
+            switch event.type
+                'quit':
+                    _global.kernel.shutdown();
+
+    openFont(path, size)
+        return Font(this, path, size);
+
+    run()
+        while true
+            if surf
+                sdl.fillRect(surf, 0, 0, surf.w, surf.h, #ffe0e0e0);
+                this.wm.drawAll();
+
+            if window
+                this.handleEvents();
+
+            if surf
+                sdl.updateWindowSurface(window);
+
+            _global.self_ctx.suspend();
+
+    setMode(w, h)
+        window = sdl.createWindow('wind OS', sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, w, h, 0);
+        surf = sdl.getWindowSurface(window);
+        this.w = w;
+        this.h = h;
+}
+
+_global.videoDriver = SdlVideoDriver();
+_global.videoDriver.wm.createWindow(440, 350, 400, 100);
+_global.videoDriver.run();

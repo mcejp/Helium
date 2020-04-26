@@ -1,0 +1,9 @@
+foo = 3;
+bar = 5;
+baz = bar;
+
+-- (foo = 3 && 3 < 5) => foo < 5;
+infer foo < 5;
+
+assert baz == 5;
+assert foo == 1;

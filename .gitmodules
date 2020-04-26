@@ -1,0 +1,6 @@
+[submodule "dependencies/xxHash"]
+	path = dependencies/xxHash
+	url = https://github.com/Cyan4973/xxHash.git
+[submodule "dependencies/fmt"]
+	path = dependencies/fmt
+	url = https://github.com/fmtlib/fmt.git

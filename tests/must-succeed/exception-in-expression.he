@@ -1,0 +1,8 @@
+function hardened() {
+    try
+        throw 'damn';
+    catch ex
+        return -1;
+}
+
+assert -1 == hardened();

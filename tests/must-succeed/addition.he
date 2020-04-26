@@ -1,0 +1,71 @@
+-- TEST 1
+
+function t1_get_int() {
+    return 42;
+}
+
+if (t1_get_int() != 42)
+    throw 'T1 ERROR';
+
+-- TEST 2
+
+function t2_get_string() {
+    return '42';
+}
+
+if (t2_get_string() != '42')
+    throw 'T2 ERROR';
+
+-- TEST 3
+
+function t3_add(a, b) {
+    return a + b;
+}
+
+if (t3_add(100, 50) != 150)
+    throw 'T3 ERROR';
+
+-- TEST 4
+
+function t4_add(a, b)
+    return a + b;
+
+if ((t4_add)(100, 50) != 150)
+    throw 'T4 ERROR';
+
+-- TEST 5
+
+local t5_adder = {
+    add: function(b) {
+        return this.a + b;
+    },
+
+    a: 10
+};
+
+if (t5_adder.add(30) != 40)
+    throw 'T5 ERROR';
+
+-- TEST 6
+
+-- This was changed on purpose, at least for now.
+--{
+local t6_adder = {
+    add: function(b) {
+        return this.a + b;
+    },
+
+    a: 10
+};
+
+if ((t6_adder.add)(30) != 40)
+    throw 'T6 ERROR';
+}--
+
+-- TEST 7
+
+local list = ();
+list.add('abc', 'xyz');
+list.add(123);
+
+return list;
