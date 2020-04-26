@@ -58,7 +58,6 @@ static const InstructionDesc descs[] = {
     {Opcodes::assert,       "assert",       OperandType::string},
     {Opcodes::new_list,     "new.list",     OperandType::integer},
     {Opcodes::new_obj,      "new.obj",      OperandType::none},
-    {Opcodes::op_next,      "next",         OperandType::codeAddress},
     {Opcodes::op_switch,    "switch",       OperandType::switchTable},
     {Opcodes::throw_var,    "throw_var",    OperandType::none},
 

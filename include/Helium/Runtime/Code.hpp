@@ -83,8 +83,6 @@ namespace Helium
             assert,     //
             new_list,   // create a list from top values on the stack
             new_obj,    // create a new empty object
-            // TODO: superficial
-            op_next,    // optimized iteration
             op_switch,  // optimized switch
             throw_var,  // throw an exception
 

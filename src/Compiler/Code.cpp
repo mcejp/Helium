@@ -140,8 +140,7 @@ namespace Helium
     {
         return opcode == Opcodes::jmp
                || opcode == Opcodes::jmp_true
-               || opcode == Opcodes::jmp_false
-               || opcode == Opcodes::op_next;
+               || opcode == Opcodes::jmp_false;
     }
 
     Script::~Script()

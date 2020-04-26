@@ -630,54 +630,47 @@ namespace Helium
             case AstNodeStatement::Type::forRange: {
                 auto forRange = static_cast<const AstNodeForRange*>(node);
 
-                Instruction* jumpToEnd;
-                unsigned iterator = 0;
+                auto iteratorVar = currentFunction->createLocal("(iterator)", nullptr);
+                auto itemVar = currentFunction->getOrAllocLocalIndex(forRange->getVariableName().c_str() );
+
                 // [1] Initialize
                 // Store zero in the iterator
-                add( Opcodes::pushc_i, node->span )->integer = 0;
-
-                iterator = currentFunction->createLocal("(iterator)", nullptr);
-                add(Opcodes::setLocal, node->span )->integer = iterator;
+                emitInteger(Opcodes::pushc_i, 0, node->span);
+                emitLocal(Opcodes::setLocal, iteratorVar, node->span);
 
                 // [2] Compare the iterator and the final value
-                //          including list iteration optimization
                 unsigned begin = currentOffset();
 
-                // iterator
-                add(Opcodes::getLocal, node->span )->integer = iterator;
-
-                // list
+                // if !(iterator < range.length)
+                emitLocal(Opcodes::getLocal, iteratorVar, node->span);
                 pushExpression(forRange->getRange());
+                emitString(Opcodes::getProperty, "length", node->span);
+                emit(Opcodes::less, node->span);
 
-                // if iterator < list.length then push list[iterator]
-                // else exit loop
-                jumpToEnd = add( Opcodes::op_next, node->span );
+                //   break
+                Instruction* jumpToEnd = add( Opcodes::jmp_false, node->span );
 
-                // pop the item
-                add(Opcodes::setLocal, node->span)->integer = currentFunction->getOrAllocLocalIndex(forRange->getVariableName().c_str() );
+                // else
+                //   item = list[iterator]
+                pushExpression(forRange->getRange());
+                emitLocal(Opcodes::getLocal, iteratorVar, node->span);
+                emit(Opcodes::getIndexed, node->span);
+                emitLocal(Opcodes::setLocal, itemVar, node->span);
 
                 compileStatement(forRange->getBlock());
 
-                // [4] Post-cycle statement
+                // [3] Post-cycle statement
 
-                // TODO: optimize for Opcodes::incl
+                // iterator += 1
+                emitLocal(Opcodes::getLocal, iteratorVar, node->span);
+                emitInteger(Opcodes::pushc_i, 1, node->span);
+                emit(Opcodes::op_add, node->span);
+                emitLocal(Opcodes::setLocal, iteratorVar, node->span);
 
-                // iterator
-                add(Opcodes::getLocal, node->span )->integer = iterator;
-
-                // increment
-                {
-                    add( Opcodes::pushc_i, node->span )->integer = 1;
-                    emit( Opcodes::op_add, node->span );
-                }
-
-                // store
-                add(Opcodes::setLocal, node->span )->integer = iterator;
-
-                // [5] Jump to [2]
+                // [4] Jump to [2]
                 add( Opcodes::jmp, node->span )->codeAddr = begin;
 
-                // [6] Statement end.
+                // [5] Statement end.
                 jumpToEnd->codeAddr = currentOffset();
                 break;
             }

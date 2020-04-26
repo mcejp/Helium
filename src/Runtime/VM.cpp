@@ -457,36 +457,6 @@ namespace Helium
                     break;
                 }
 
-                case Opcodes::op_next:
-                {
-                    static const VMString length_vms = VMString::fromCString("length");
-
-                    ValueRef iterator, length, range;
-
-                    range = ctx.stack.pop();
-
-                    if (!RuntimeFunctions::getProperty(range, length_vms, &length, true))
-                        break;
-
-                    iterator = ctx.stack.pop();
-
-                    bool lessThan;
-
-                    if (!RuntimeFunctions::operatorLessThan(iterator, length, &lessThan))
-                        break;
-
-                    if ( lessThan ) {
-                        ValueRef item;
-
-                        if (RuntimeFunctions::getIndexed(range, iterator, &item))
-                            ctx.stack.push(move(item));
-                    }
-                    else
-                        ctx.pc = next->codeAddr;
-
-                    break;
-                }
-
                 case Opcodes::nop:
                     break;
 
