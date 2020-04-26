@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Helium/Assert.hpp>
 #include <Helium/Runtime/Value.hpp>
 
 #include <cstdlib>
