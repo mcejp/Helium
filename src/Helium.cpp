@@ -5,6 +5,10 @@
 #include <Helium/Runtime/RuntimeFunctions.hpp>
 #include <Helium/Runtime/VM.hpp>
 
+#if HELIUM_TRACE_GC
+#include <Helium/Runtime/Debug/GcTrace.hpp>
+#endif
+
 #if HELIUM_TRACE_VALUES
 #include <Helium/Runtime/Debug/ValueTrace.hpp>
 #endif
@@ -37,13 +41,6 @@ namespace Helium
 
         std::vector<fs::path> modulePaths;
         modulePaths.emplace_back( "." );
-
-#ifdef WIN32
-        WCHAR buffer[FILENAME_MAX];
-        GetModuleFileNameW( nullptr, buffer, std::size( buffer ) );
-
-        modulePaths.push_back( fs::path(std::wstring(buffer)).parent_path() );
-#endif
 
         optimize = true;
         disassemble = false;
@@ -236,6 +233,10 @@ int main( int argc, char *argv[] )
 #ifdef _DEBUG
     _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF | _CRTDBG_LEAK_CHECK_DF );
     //_CrtSetBreakAlloc();
+#endif
+
+#if HELIUM_TRACE_GC
+    Helium::GcTrace gcTrace(".helium_gc.log");
 #endif
 
 #if HELIUM_TRACE_VALUES

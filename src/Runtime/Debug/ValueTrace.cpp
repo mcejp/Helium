@@ -31,7 +31,7 @@ namespace {
     std::unordered_map<VarId_t, ValueInfo> s_values;
     int s_numFatalErrors = 0;
 
-    std::fstream logfile;
+    std::ofstream logfile;
 
     void reportContext(ValueTraceCtx *context) {
         for (; context; context = context->prev) {
@@ -100,7 +100,7 @@ namespace {
 }
 
 ValueTrace::ValueTrace(std::filesystem::path const& logFilePath) {
-    logfile.open(logFilePath, std::ios::out);
+    logfile.open(logFilePath);
 }
 
 ValueTrace::~ValueTrace() {

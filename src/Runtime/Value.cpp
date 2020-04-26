@@ -4,7 +4,6 @@
 #include <Helium/Runtime/VM.hpp>
 
 #include <cinttypes>
-#include <cmath>
 #include <cstdlib>
 
 #if HELIUM_TRACE_VALUES
@@ -157,7 +156,7 @@ namespace Helium
 
                 if (!(gc->flags & GC_registered))
                 {
-                    gc->vm->addPossibleGarbage(*this);
+                    gc->vm->addPossibleRootOfCycle(*this);
                     gc->flags |= GC_registered;
                 }
             }
@@ -750,6 +749,10 @@ namespace Helium
         }
         else
             return 0;
+    }
+
+    int Value::getNumExistingValues() {
+        return numExistingVars;
     }
 
     std::string_view to_string(ValueType t) {

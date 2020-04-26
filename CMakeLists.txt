@@ -24,6 +24,7 @@ set(HEADER_FILES
         include/Helium/Memory/PoolPtr.hpp
         include/Helium/Platform/ScriptContainer.hpp
         include/Helium/Runtime/Debug/Disassembler.hpp
+        include/Helium/Runtime/Debug/GcTrace.hpp
         include/Helium/Runtime/Debug/ValueTrace.hpp
         include/Helium/Runtime/ActivationContext.hpp
         include/Helium/Runtime/BindingHelpers.hpp
@@ -60,6 +61,7 @@ set(SOURCE_FILES
         src/Memory/LinearAllocator.cpp
         src/Platform/ScriptContainer.cpp
         src/Runtime/Debug/Disassembler.cpp
+        src/Runtime/Debug/GcTrace.cpp
         src/Runtime/Debug/ValueTrace.cpp
         src/Runtime/ActivationContext.cpp
         src/Runtime/BindingHelpers.cpp

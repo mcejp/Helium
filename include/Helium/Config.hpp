@@ -10,7 +10,9 @@
 #define HELIUM_MIXED_MODE
 
 #if HELIUM_DEBUG
+#define HELIUM_TRACE_GC 1
 #define HELIUM_TRACE_VALUES 1
 #else
+#define HELIUM_TRACE_GC 0
 #define HELIUM_TRACE_VALUES 0
 #endif

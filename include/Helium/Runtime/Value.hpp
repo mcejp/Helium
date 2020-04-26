@@ -245,6 +245,9 @@ namespace Helium
         void gc_mark_not_registered();
         unsigned gc_collect_white();
 
+        // Diagnostics
+        static int getNumExistingValues();
+
     private:
         Value() = default;
 

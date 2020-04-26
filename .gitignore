@@ -5,4 +5,5 @@
 /vcxproj/
 
 .helium_disassembly/
+.helium_gc.log
 .helium_value_trace

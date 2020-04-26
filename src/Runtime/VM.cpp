@@ -5,6 +5,8 @@
 #include <Helium/Runtime/NativeStringFunctions.hpp>
 #include <Helium/Runtime/VM.hpp>
 
+#include <Helium/Runtime/Debug/GcTrace.hpp>
+
 #if HELIUM_TRACE_VALUES
 #include <Helium/Runtime/Debug/ValueTrace.hpp>
 #endif
@@ -15,12 +17,16 @@
 #include <unordered_map>
 #include <Helium/Runtime/NativeObjectFunctions.hpp>
 
-#define GC_min_threshold 200
-
 namespace Helium
 {
+
+namespace {
     static std::unordered_map<std::string, NativeFunction> listMethods;
     static std::unordered_map<std::string, NativeFunction> stringMethods;
+
+    // How many Possible Cycle Roots are needed to trigger a collect cycle
+    inline auto GC_NUM_POSSIBLE_ROOTS_THRESHOLD = 1000;
+}
 
     using std::move;
 
@@ -34,13 +40,9 @@ namespace Helium
         return {};
     }
 
-    VM::VM() : desiredGcRuntime( 800 ), gcThreshold( 500 )
+    VM::VM()
     {
         global.reset(Value::newObject( this ));
-
-#ifdef win32_gc_profiling
-        QueryPerformanceFrequency( &performanceFrequency );
-#endif
 
         //registerStringFunctions( stringFunctions );
 
@@ -56,21 +58,10 @@ namespace Helium
     {
         ValueTraceCtx tracking_ctx("~VM");
 
-        /*while ( !stack.isEmpty() )
-        {
-            printf( "\n\nDEBUG WARNING: STACK NOT EMPTY: " );
-            Variable next = ctx.stack.pop();
-            next.print();
-            next.release();
-            printf( "\n\n" );
-        }*/
-
-        clearStacks();
-
         global.reset();
         loadedModules.clear();
 
-        collectGarbage( true );
+        collectGarbage( GarbageCollectReason::vmShutdown );
     }
 
     /*void VM::addCode( size_t module, Instruction** code, size_t length )
@@ -89,63 +80,35 @@ namespace Helium
         numInstructions += length;
     }*/
 
-    void VM::collectGarbage( bool final )
+    void VM::collectGarbage(GarbageCollectReason reason)
     {
-#ifdef win32_gc_profiling
-        LARGE_INTEGER begin, end;
+        ValueTraceCtx tracking_ctx("VM::collectGarbage");
 
-        QueryPerformanceCounter( &begin );
-#endif
+        GcTrace::beginCollectGarbage(reason, numInstructionsSinceLastCollect);
 
-        for ( size_t i = possibleGarbage.size(); i > 0; )
+        for (size_t i = possibleRoots.size(); i > 0; )
         {
             --i;
-            if (possibleGarbage[i].gc_mark() )
-                possibleGarbage.erase( possibleGarbage.begin() + i );
+            if (possibleRoots[i].gc_mark() )
+                possibleRoots.erase(possibleRoots.begin() + i );
         }
 
-        for ( auto& var : possibleGarbage )
+        for ( auto& var : possibleRoots )
             var.gc_scan();
 
-        unsigned count = 0;
+        int numValuesCollected = 0;
 
-        for (size_t i = possibleGarbage.size(); i > 0; )
+        for (size_t i = possibleRoots.size(); i > 0; )
         {
             --i;
-            possibleGarbage[i].gc_mark_not_registered();
-            count += possibleGarbage[i].gc_collect_white();
+            possibleRoots[i].gc_mark_not_registered();
+            numValuesCollected += possibleRoots[i].gc_collect_white();
         }
 
-        possibleGarbage.clear();
+        possibleRoots.clear();
 
-#ifdef win32_gc_profiling
-        QueryPerformanceCounter( &end );
-
-        printf( "VM.collectGarbage(): %u objects released, %g ms total\n", count, ( end.QuadPart - begin.QuadPart ) * 1000.0 / performanceFrequency.QuadPart );
-
-        if ( !final )
-        {
-            printf( "gcThreshold: %u", gcThreshold );
-
-            __int64 totalRun = ( end.QuadPart - begin.QuadPart ) * 1000000 / performanceFrequency.QuadPart;
-            gcThreshold = gcThreshold * desiredGcRuntime / totalRun;
-
-            if ( gcThreshold < GC_min_threshold )
-                gcThreshold = GC_min_threshold;
-
-            printf( " => %u instructions\n", gcThreshold );
-        }
-#endif
-    }
-
-    void VM::clearStacks()
-    {
-        /*callStack.clear();
-
-        while ( !stack.isEmpty() )
-            ctx.stack.pop().release();
-
-        frameBottom.clear();*/
+        GcTrace::endCollectGarbage(numValuesCollected);
+        numInstructionsSinceLastCollect = 0;
     }
 }
 
@@ -184,8 +147,8 @@ namespace Helium
             // This includes STRING_OPERAND
             helium_assert( ctx.pc < ctx.activeModule->instructions.size() );
 
-            if ( possibleGarbage.size() > gcThreshold )
-                collectGarbage( false );
+            if (possibleRoots.size() > GC_NUM_POSSIBLE_ROOTS_THRESHOLD)
+                collectGarbage( GarbageCollectReason::numPossibleRoots );
 
             auto next = &ctx.activeModule->instructions[ctx.pc++];
 
@@ -700,6 +663,8 @@ namespace Helium
                     helium_assert(next->opcode != next->opcode);
             }
 
+            numInstructionsSinceLastCollect++;
+
             if (ctx.state == ActivationContext::raisedException) {
                 // Pop frames until we find a handler
 
@@ -924,5 +889,18 @@ namespace Helium
 
         externals.emplace_back(ExternalFunc{ name, callback });
         return static_cast<int16_t>( externals.size() - 1 );
+    }
+
+    std::string_view to_string(GarbageCollectReason gcReason) {
+        switch (gcReason) {
+            case GarbageCollectReason::numInstructionsSinceLastCollect:
+                return "numInstructionsSinceLastCollect";
+            case GarbageCollectReason::numPossibleRoots:
+                return "numPossibleRoots";
+            case GarbageCollectReason::vmShutdown:
+                return "vmShutdown";
+        }
+
+        helium_abort_expression(gcReason != gcReason);
     }
 }

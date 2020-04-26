@@ -8,16 +8,15 @@
 #include <stack>
 #include <vector>
 
-#ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
-#define win32_gc_profiling
-#endif
-
 namespace Helium
 {
     class ActivationContext;
+
+    enum class GarbageCollectReason {
+        numInstructionsSinceLastCollect,
+        numPossibleRoots,
+        vmShutdown,
+    };
 
     /**
      * A module exists only within a VM.
@@ -49,36 +48,12 @@ namespace Helium
             std::vector<ExternalFunc> externals;
 
             // Garbage collection
-            std::vector<Value> possibleGarbage;
+            // Possible roots of cycles (_purple_ in the paper's terminology)
+            std::vector<Value> possibleRoots;
+            int numInstructionsSinceLastCollect = 0;
 
             // Primitive variable methods
             //HashMap<StringWrapper, NativeFunction> stringFunctions;
-
-#ifdef win32_gc_profiling
-            LARGE_INTEGER performanceFrequency;
-#endif
-
-            unsigned desiredGcRuntime, gcThreshold;
-
-        protected:
-            void clearStacks();
-            //void execute();
-            bool ret();
-
-            /*inline Variable& getLocal( unsigned index )
-            {
-                return locals[frameBottom.top() + index];
-            }*/
-
-            void invoke( Value me, unsigned target );
-            void invoke( Value object, const char* methodName, InstructionOrigin* origin );
-
-            /*inline void setLocal( unsigned index, Variable value )
-            {
-                frameTop = maximum( index + 1, frameTop );
-                locals[frameBottom.top() + index].release();
-                locals[frameBottom.top() + index] = value;
-            }*/
 
         public:
             ValueRef global;
@@ -87,29 +62,16 @@ namespace Helium
             VM();
             ~VM();
 
-            //void addCode( size_t module, Instruction** code, size_t length );
-
-            void addPossibleGarbage( Value var ) { possibleGarbage.push_back( var ); }
-
-            void collectGarbage( bool final );
-
-            /*inline unsigned getCodeLength() const
-            {
-                return numInstructions;
-            }*/
+            void addPossibleRootOfCycle(Value var ) { possibleRoots.push_back(var ); }
+            void collectGarbage( GarbageCollectReason reason );
 
             Module* getModuleByIndex(ModuleIndex_t moduleIndex) { return loadedModules[moduleIndex].get(); }
             ModuleIndex_t loadModule( Script* script );
 
-            /*unsigned readNumParameters()
-            {
-                return callStack.pop();
-            }*/
-
             int16_t registerCallback( const char* name, NativeFunction callback );
-            //Variable invoke( Variable methocator, List<Variable>& arguments, bool blindCall, bool keepArguments );
 
-            //ActivationContext::State run( size_t entry, Variable* result_out );
             void execute( ActivationContext& ctx );
     };
+
+    std::string_view to_string(GarbageCollectReason);
 }
