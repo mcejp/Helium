@@ -32,7 +32,7 @@ namespace Helium
     bool unwrap(Value var, int* value_out) {
         Int_t value;
 
-        if (!RuntimeFunctions::asInteger(var, &value))
+        if (!RuntimeFunctions::asInteger(var, &value, true))
             return false;
 
         if (value < std::numeric_limits<int>::min() || value > std::numeric_limits<int>::max()) {
@@ -48,7 +48,7 @@ namespace Helium
     bool unwrap(Value var, unsigned int* value_out) {
         Int_t value;
 
-        if (!RuntimeFunctions::asInteger(var, &value))
+        if (!RuntimeFunctions::asInteger(var, &value, true))
             return false;
 
         if (value < std::numeric_limits<unsigned int>::min() || value > std::numeric_limits<unsigned int>::max()) {
@@ -82,7 +82,7 @@ namespace Helium
     bool unwrap(Value var, uint64_t* value_out) {
         Int_t value;
 
-        if (!RuntimeFunctions::asInteger(var, &value))
+        if (!RuntimeFunctions::asInteger(var, &value, true))
             return false;
 
         if (value < std::numeric_limits<uint64_t>::min() || value > std::numeric_limits<uint64_t>::max()) {
@@ -96,7 +96,7 @@ namespace Helium
 
     template <>
     bool unwrap(Value var, StringPtr* value_out) {
-        if (!RuntimeFunctions::asString(var, value_out))
+        if (!RuntimeFunctions::asString(var, value_out, true))
             return false;
 
         return true;

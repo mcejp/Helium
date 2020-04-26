@@ -175,7 +175,7 @@ namespace Helium
                 ValueRef value = ctx.stack.pop();
                 bool boolValue;
 
-                if (!RuntimeFunctions::asBoolean(value, &boolValue))
+                if (!RuntimeFunctions::asBoolean(value, &boolValue, true))
                     break;
 
                 if (!boolValue) {
@@ -318,7 +318,7 @@ namespace Helium
                     ValueRef value = ctx.stack.pop();
                     bool boolValue;
 
-                    if (!RuntimeFunctions::asBoolean(value, &boolValue))
+                    if (!RuntimeFunctions::asBoolean(value, &boolValue, true))
                         break;
 
                     if (boolValue)
@@ -331,7 +331,7 @@ namespace Helium
                     ValueRef value = ctx.stack.pop();
                     bool boolValue;
 
-                    if (!RuntimeFunctions::asBoolean(value, &boolValue))
+                    if (!RuntimeFunctions::asBoolean(value, &boolValue, true))
                         break;
 
                     if (!boolValue)
@@ -649,7 +649,7 @@ namespace Helium
                     ValueRef value = ctx.stack.pop();
                     Int_t intValue;
 
-                    if (RuntimeFunctions::asInteger(value, &intValue))
+                    if (RuntimeFunctions::asInteger(value, &intValue, true))
                         ctx.frame->setRegisterInt(next->reg.r0, intValue);
                     break;
                 }

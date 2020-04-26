@@ -499,7 +499,7 @@ namespace Helium
             }
             else if ( !mustBeAssignable && ( arguments = parseEnclosedList() ) )
             {
-                top = make_pooled<AstNodeCall>(move(top), move(arguments), SourceSpan {}, false);
+                top = make_pooled<AstNodeCall>(move(top), move(arguments), arguments->span, false);
             }
             else
                 break;

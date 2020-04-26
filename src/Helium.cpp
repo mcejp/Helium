@@ -210,14 +210,11 @@ namespace Helium
             else if (ctx.getState() == ActivationContext::raisedException) {
                 Value ex = ctx.getException();
 
-                ValueRef exitCode;
-                if (RuntimeFunctions::getProperty(ex, VMString::fromCString("exitCode"), &exitCode, false)) {
-                    Int_t i;
-
-                    // FIXME: if this raises another exception, what will happen to the original one?
-                    if (RuntimeFunctions::asInteger(exitCode, &i)) {
-                        return (int) i;
-                    }
+                ValueRef exitCodeVal;
+                Int_t exitCode;
+                if (RuntimeFunctions::getProperty(ex, VMString::fromCString("exitCode"), &exitCodeVal, false)
+                        && RuntimeFunctions::asInteger(exitCodeVal, &exitCode, false)) {
+                    return (int) exitCode;
                 }
 
                 ex.print();

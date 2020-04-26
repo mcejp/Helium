@@ -17,14 +17,14 @@ namespace Helium
     // ALL functions in this class require an Activation Scope.
     class RuntimeFunctions {
     public:
-        // TODO: document how much coercion is going on, and by which rules
-        static bool asBoolean(Value value, bool* value_out);
-        static bool asInteger(Value var, Int_t* value_out);
-        static bool asReal(Value var, Real_t* value_out);
+        // These follow Implicit Conversion Rules
+        static bool asBoolean(Value value, bool* value_out, bool raiseIfInvalid);
+        static bool asInteger(Value var, Int_t* value_out, bool raiseIfInvalid);
+        static bool asReal(Value var, Real_t* value_out, bool raiseIfInvalid);
 
         // TODO: this is not safe and unfortunately will need to go
         // TODO: why? because it doesn't copy and the original string might disappear?
-        static bool asString(Value var, StringPtr* value_out);
+        static bool asString(Value var, StringPtr* value_out, bool raiseIfInvalid);
 
         // Returns false if an exception was raised
         // These functions are higher-level than e.g. NativeListFunctions::setItem, because they check the value type

@@ -12,7 +12,7 @@ namespace Helium
 {
     using std::move;
 
-    bool RuntimeFunctions::asBoolean(Value value, bool* value_out) {
+    bool RuntimeFunctions::asBoolean(Value value, bool* value_out, bool raiseIfInvalid) {
         helium_assert_debug(ActivationContext::getCurrentOrNull() != nullptr);
 
         switch ( value.type ) {
@@ -50,7 +50,7 @@ namespace Helium
         }
     }
 
-    bool RuntimeFunctions::asInteger(Value var, Int_t* value_out) {
+    bool RuntimeFunctions::asInteger(Value var, Int_t* value_out, bool raiseIfInvalid) {
         helium_assert_debug(ActivationContext::getCurrentOrNull() != nullptr);
 
         if (var.type == ValueType::integer) {
@@ -58,12 +58,15 @@ namespace Helium
             return true;
         }
         else {
-            RuntimeFunctions::raiseException("Expected an integer");
+            if (raiseIfInvalid) {
+                raiseException("Expected an integer");
+            }
+
             return false;
         }
     }
 
-    bool RuntimeFunctions::asReal(Value var, Real_t* value_out) {
+    bool RuntimeFunctions::asReal(Value var, Real_t* value_out, bool raiseIfInvalid) {
         helium_assert_debug(ActivationContext::getCurrentOrNull() != nullptr);
 
         if (var.type == ValueType::integer) {
@@ -75,12 +78,15 @@ namespace Helium
             return true;
         }
         else {
-            RuntimeFunctions::raiseException("Expected a real");
+            if (raiseIfInvalid) {
+                RuntimeFunctions::raiseException("Expected a real");
+            }
+
             return false;
         }
     }
 
-    bool RuntimeFunctions::asString(Value var, StringPtr* value_out) {
+    bool RuntimeFunctions::asString(Value var, StringPtr* value_out, bool raiseIfInvalid) {
         helium_assert_debug(ActivationContext::getCurrentOrNull() != nullptr);
 
         if (var.type == ValueType::string) {
@@ -88,7 +94,10 @@ namespace Helium
             return true;
         }
         else {
-            RuntimeFunctions::raiseException("Expected a string");
+            if (raiseIfInvalid) {
+                RuntimeFunctions::raiseException("Expected a string");
+            }
+
             return false;
         }
     }
