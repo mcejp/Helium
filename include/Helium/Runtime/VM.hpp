@@ -19,9 +19,9 @@ namespace Helium
     };
 
     /**
-     * A module exists only within a VM.
+     * A loaded module bound to a specific VM (why ?)
      */
-    struct Module
+    struct VMModule
     {
         std::vector<ScriptFunction> functions;
         std::vector<Instruction> instructions;
@@ -44,7 +44,7 @@ namespace Helium
             };
 
             // Code and execution
-            std::vector<std::unique_ptr<Module>> loadedModules;
+            std::vector<std::unique_ptr<VMModule>> loadedModules;
             std::vector<ExternalFunc> externals;
 
             // Garbage collection
@@ -65,8 +65,8 @@ namespace Helium
             void addPossibleRootOfCycle(Value var ) { possibleRoots.push_back(var ); }
             void collectGarbage( GarbageCollectReason reason );
 
-            Module* getModuleByIndex(ModuleIndex_t moduleIndex) { return loadedModules[moduleIndex].get(); }
-            ModuleIndex_t loadModule( Script* script );
+            VMModule* getModuleByIndex(ModuleIndex_t moduleIndex) { return loadedModules[moduleIndex].get(); }
+            ModuleIndex_t loadModule(Module* script );
 
             int16_t registerCallback( const char* name, NativeFunction callback );
 

@@ -5,7 +5,7 @@
 namespace Helium
 {
     ScriptContainer::ScriptContainer(const char* scriptName, const char* scriptSource) : ctx(&vm) {
-        std::unique_ptr<Script> script(compiler.compileString(scriptName, scriptSource));
+        std::unique_ptr<Module> script(compiler.compileString(scriptName, scriptSource));
 
         moduleIndex = vm.loadModule(script.get());
     }

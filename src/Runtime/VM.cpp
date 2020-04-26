@@ -30,7 +30,7 @@ namespace {
 
     using std::move;
 
-    std::optional<FunctionIndex_t> Module::findMainFunction() {
+    std::optional<FunctionIndex_t> VMModule::findMainFunction() {
         for (size_t i = 0; i < functions.size(); i++) {
             if (functions[i].name == ScriptFunction::MAIN_FUNCTION_NAME) {
                 return i;
@@ -776,7 +776,7 @@ namespace Helium
         return oldLength;
     }*/
 
-    ModuleIndex_t VM::loadModule( Script* script )
+    ModuleIndex_t VM::loadModule(Module* script )
     {
         std::vector<size_t> externalIndices;
         externalIndices.resize( script->dependencies.size() );
@@ -799,7 +799,7 @@ namespace Helium
             externalIndices[i] = index;
         }
 
-        auto module = std::make_unique<Module>();
+        auto module = std::make_unique<VMModule>();
 
         size_t stringPoolSize = script->stringPool.size() * sizeof(VMString);
 

@@ -7,7 +7,7 @@ namespace Helium
     class Optimizer
     {
         public:
-            static void optimize( Script* script );
-            static void optimizeWithStatistics( Script* script );
+            static void optimize(Module& script);
+            static void optimizeWithStatistics(Module& script);
     };
 }

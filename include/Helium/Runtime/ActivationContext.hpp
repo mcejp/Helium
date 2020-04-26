@@ -13,7 +13,7 @@ namespace Helium
 {
     struct Instruction;
     struct InstructionOrigin;
-    struct Module;
+    struct VMModule;
     struct ScriptFunction;
     class VM;
 
@@ -39,7 +39,7 @@ namespace Helium
 #endif
 
         // These variables are cached in ActivationContext and only flushed on function calls!
-        Module* module;
+        VMModule* module;
         ModuleIndex_t moduleIndex;
         CodeAddr_t pc;
 
@@ -134,7 +134,7 @@ namespace Helium
             Frame* frame = nullptr;
 
             InlineStack<Value> stack;
-            Module* activeModule = nullptr;
+            VMModule* activeModule = nullptr;
             ModuleIndex_t activeModuleIndex = -1;
             CodeAddr_t pc = -1;
             size_t numArgs = -1;

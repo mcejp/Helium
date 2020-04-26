@@ -13,6 +13,6 @@ namespace Helium
     class BytecodeCompiler
     {
         public:
-            static std::unique_ptr<Script> compile( AstNodeScript& tree, bool withDebugInformation = true, std::shared_ptr<std::string> unitNameString = 0 );
+            static std::unique_ptr<Module> compile(AstNodeScript& tree, bool withDebugInformation = true, std::shared_ptr<std::string> unitNameString = 0 );
     };
 }

@@ -95,7 +95,7 @@ namespace Helium
             printf( "Helium HEAD\n  Copyright (c) 2008-2020\n\n" );
 
         std::unique_ptr<Helium::VM> vm;
-        std::unique_ptr<Helium::Script> script;
+        std::unique_ptr<Helium::Module> script;
 
         try
         {
@@ -156,9 +156,9 @@ namespace Helium
         {
 #ifndef helium_no_optimizer
             if ( silent )
-                Helium::Optimizer::optimize( script.get() );
+                Helium::Optimizer::optimize(*script);
             else
-                Helium::Optimizer::optimizeWithStatistics( script.get() );
+                Helium::Optimizer::optimizeWithStatistics(*script);
 #endif
         }
 

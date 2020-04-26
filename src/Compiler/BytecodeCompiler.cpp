@@ -120,7 +120,7 @@ namespace Helium
 
     struct AssemblerState
     {
-        std::unique_ptr<Script> script;
+        std::unique_ptr<Module> script;
 
         std::vector<Function*> functions;
         std::vector<Function*> unknownPushFuncPtrs;     // TODO: what does this serve
@@ -138,7 +138,7 @@ namespace Helium
         AssemblerState( bool withDebugInformation, std::shared_ptr<std::string> unitNameString )
             : generateDebug( withDebugInformation ), unitNameString( unitNameString )
         {
-            script = std::make_unique<Script>();
+            script = std::make_unique<Module>();
         }
 
         ~AssemblerState()
@@ -1706,7 +1706,7 @@ namespace Helium
         }
     }
 
-    std::unique_ptr<Script> BytecodeCompiler::compile( AstNodeScript& tree, bool withDebugInformation, std::shared_ptr<std::string> unitNameString )
+    std::unique_ptr<Module> BytecodeCompiler::compile(AstNodeScript& tree, bool withDebugInformation, std::shared_ptr<std::string> unitNameString )
     {
 #if HELIUM_TRACE_VALUES
         auto frame = string("compile: ") + *unitNameString;
@@ -1719,7 +1719,7 @@ namespace Helium
         state.cook();
 
         // Cut-out the generated script from the Assembler State
-        std::unique_ptr<Script> script = std::move(state.script);
+        std::unique_ptr<Module> script = std::move(state.script);
 
         if (state.failed)
             return nullptr;

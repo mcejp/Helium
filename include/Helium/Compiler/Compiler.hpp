@@ -9,7 +9,7 @@
 
 namespace Helium
 {
-    struct Script;
+    struct Module;
 
     struct SourcePoint {
         const char* unit;           // non-owning reference; pooled in Helium::Compiler instance
@@ -61,10 +61,8 @@ namespace Helium
         public:
             enum { version = 1000 };
 
-            // TODO: what does "optional" mean?
-            std::unique_ptr<Script> compileFile( std::filesystem::path const& fileName, bool optional = false );
-
-            std::unique_ptr<Script> compileString( std::filesystem::path const& fileName, std::string_view script );
+            std::unique_ptr<Module> compileFile(std::filesystem::path const& fileName);
+            std::unique_ptr<Module> compileString(std::filesystem::path const& fileName, std::string_view script);
 
             // TODO: nuke
             std::string getCurrentUnit() const { return *currentUnitName.top().get(); }

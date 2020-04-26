@@ -12,7 +12,7 @@ namespace Helium
     using stx::optional;
     using std::string;
 
-    static ScriptFunction const* tryGetFunctionAtPC(Script const& script, CodeAddr_t pc) {
+    static ScriptFunction const* tryGetFunctionAtPC(Module const& script, CodeAddr_t pc) {
         for (size_t i = 0; i < script.functions.size(); i++) {
             if (pc >= script.functions[i].start && pc < script.functions[i].start + script.functions[i].length)
                 return &script.functions[i];
@@ -42,7 +42,7 @@ namespace Helium
         }
     }
 
-    void Disassembler::disassemble(Script const& script, LineSink const& output)
+    void Disassembler::disassemble(Module const& script, LineSink const& output)
     {
         output(format("; {} functions in module", script.functions.size()));
 

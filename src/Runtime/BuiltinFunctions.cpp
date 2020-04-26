@@ -58,15 +58,15 @@ namespace Helium
 
     // Script
     template <>
-    std::pair<const std::pair<const char*, NativeFunction>*, size_t> getMethods<Script>() {
+    std::pair<const std::pair<const char*, NativeFunction>*, size_t> getMethods<Module>() {
         return {nullptr, 0};
     }
 
     template <>
-    bool wrap(Script*&& value, ValueRef* value_out) { return wrapNewDelete(value, value_out); }
+    bool wrap(Module*&& value, ValueRef* value_out) { return wrapNewDelete(value, value_out); }
 
     template <>
-    bool unwrap(Value var, Script** value_out) { return unwrapClass(var, value_out); }
+    bool unwrap(Value var, Module** value_out) { return unwrapClass(var, value_out); }
 
     // ActivationContext
 
@@ -149,7 +149,7 @@ namespace Helium
     std::pair<const std::pair<const char*, NativeFunction>*, size_t> getMethods<VM>() {
         static constexpr std::pair<const char*, NativeFunction> methods[]{
             { "execute",            wrapFunctionVoid<VM*, ActivationContext*, VM_execute> },
-            { "loadModule",         wrapMethod<ModuleIndex_t, VM, Script*, &VM::loadModule> },
+            { "loadModule",         wrapMethod<ModuleIndex_t, VM, Module*, &VM::loadModule> },
             //{ "run",                wrapFunction<VM*, size_t, VM_run> },
         };
 
@@ -187,7 +187,7 @@ namespace Helium
     }
 
     // Compiler.compileString(unitName: string, string: string): Script?
-    static Script* Compiler_compileString(Compiler* compiler, StringPtr unitName, StringPtr string) {
+    static Module* Compiler_compileString(Compiler* compiler, StringPtr unitName, StringPtr string) {
         return compiler->compileString(unitName.operator const char*(), string.operator const char *()).release();
     }
 
@@ -200,7 +200,7 @@ namespace Helium
     std::pair<const std::pair<const char*, NativeFunction>*, size_t> getMethods<Compiler>() {
         static constexpr std::pair<const char*, NativeFunction> methods[] {
             { "compileFile",        wrapFunctionVoid<Compiler*, StringPtr, Compiler_compileFile> },
-            { "compileString",      wrapFunction<Script*,       Compiler*, StringPtr, StringPtr, Compiler_compileString> },
+            { "compileString",      wrapFunction<Module*,       Compiler*, StringPtr, StringPtr, Compiler_compileString> },
             { "getVersion",         wrapFunction<int,           Compiler*, Compiler_getVersion> },
         };
 

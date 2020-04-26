@@ -203,7 +203,7 @@ namespace Helium
         bool isList() const { return type == ValueType::list; }
         bool isObject() const { return type == ValueType::object; }
 
-        void print( unsigned depth = 0 );
+        [[deprecated]] void print( unsigned depth = 0 );
         //void printCompact( unsigned depth = 0 );
 
         /* LISTS */

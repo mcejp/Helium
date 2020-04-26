@@ -43,17 +43,14 @@ namespace Helium
         return SourceSpan{span1.start, span2.end};
     }
 
-    std::unique_ptr<Script> Compiler::compileFile( std::filesystem::path const& fileName, bool optional )
+    std::unique_ptr<Module> Compiler::compileFile(std::filesystem::path const& fileName)
     {
         std::ifstream inFile(fileName);
 
         if ( !inFile )
         {
-            if ( optional )
-                return 0;
-            else
-                // TODO: propagate OS error
-                throw CompileException( "FileOpenError", ( fileName.string() + " is not a readable file" ).c_str() );
+            // TODO: propagate OS error
+            throw CompileException( "FileOpenError", ( fileName.string() + " is not a readable file" ).c_str() );
         }
 
         std::stringstream buffer;
@@ -63,7 +60,7 @@ namespace Helium
         return compileString( fileName, source );
     }
 
-    std::unique_ptr<Script> Compiler::compileString( std::filesystem::path const& fileName, std::string_view source )
+    std::unique_ptr<Module> Compiler::compileString(std::filesystem::path const& fileName, std::string_view source)
     {
         auto fileNameAsString = fileName.string();
 
@@ -97,7 +94,7 @@ namespace Helium
         fa.verifyScript(tree.get());
 #endif
 
-        std::unique_ptr<Script> script = BytecodeCompiler::compile( *tree, true, currentUnitName.top() );
+        std::unique_ptr<Module> script = BytecodeCompiler::compile(*tree, true, currentUnitName.top() );
 
         //printf("[%s] AST memory: %zu bytes (%zu including overhead)\n", unitName, astAllocator.getMemoryUsage(), astAllocator.getMemoryUsageInclOverhead());
 

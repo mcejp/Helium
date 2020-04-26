@@ -143,7 +143,7 @@ namespace Helium
                || opcode == Opcodes::jmp_false;
     }
 
-    Script::~Script()
+    Module::~Module()
     {
 #if HELIUM_TRACE_VALUES
         ValueTraceCtx tracking_ctx("~Script");

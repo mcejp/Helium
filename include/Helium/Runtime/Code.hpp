@@ -208,7 +208,7 @@ namespace Helium
         std::vector<Eh> exceptionHandlers;
     };
 
-    struct Script
+    struct Module
     {
         std::vector<std::string> dependencies;
         std::vector<ScriptFunction> functions;
@@ -217,6 +217,6 @@ namespace Helium
         std::vector<std::vector<uint8_t>> stringPool;
         std::vector<std::shared_ptr<SwitchTable>> switchTables;
 
-        ~Script();
+        ~Module();
     };
 }

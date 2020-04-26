@@ -4,7 +4,8 @@ A little glossary:
 
 - A *list* of *items*: `(1, 2, 3)`
 - An *object* has *members* (probably should be *properties*, *attributes*, *fields*, or something)
-- All *functions* go into *modules* (previously: units), including the fictitious *main function*
+- All *functions* go into *modules*, including the fictitious *main function*
+- *Script functions* vs *native functions*.
 
 ## How to build
 

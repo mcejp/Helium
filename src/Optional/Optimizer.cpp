@@ -4,9 +4,9 @@ namespace Helium
 {
     using std::string;
 
-    static bool isReferenced( Script* script, unsigned index )
+    static bool isReferenced(Module& script, CodeAddr_t index)
     {
-        auto& code = script->code;
+        auto& code = script.code;
 
         for ( size_t i = 0; i < code.size(); i++ )
         {
@@ -20,7 +20,7 @@ namespace Helium
             }
             else if ( op == Opcodes::op_switch )
             {
-                auto switchTable = script->switchTables[current->switchTableIndex];
+                auto switchTable = script.switchTables[current->switchTableIndex];
 
                 for ( unsigned i = 0; i < switchTable->handlers.size(); i++ )
                     if ( switchTable->handlers[i] == index )
@@ -50,9 +50,9 @@ namespace Helium
         }
     }*/
 
-    static void removeInstruction( Script* script, unsigned index )
+    static void removeInstruction(Module& script, CodeAddr_t index)
     {
-        auto& code = script->code;
+        auto& code = script.code;
 
         delete code[index];
         code.erase(code.begin() + index);
@@ -66,7 +66,7 @@ namespace Helium
                 current->codeAddr--;
             else if ( op == Opcodes::op_switch )
             {
-                auto switchTable = script->switchTables[current->switchTableIndex];
+                auto switchTable = script.switchTables[current->switchTableIndex];
 
                 for ( unsigned i = 0; i < switchTable->handlers.size(); i++ )
                     if ( switchTable->handlers[i] > index )
@@ -75,7 +75,7 @@ namespace Helium
         }
 
         // Fixup functions
-        for (auto& func : script->functions) {
+        for (auto& func : script.functions) {
             if (index < func.start)
                 func.start--;
 
@@ -95,15 +95,15 @@ namespace Helium
         }
     }
 
-    void Optimizer::optimize( Script* script )
+    void Optimizer::optimize(Module& script)
     {
-        for ( size_t i = 0; i < script->code.size(); i++ )
+        for ( size_t i = 0; i < script.code.size(); i++ )
         {
             // ALWAYS remove instructions in the REVERSE ORDER!!!
 
-            Instruction* current = script->code[i];
-            Instruction* next = ( i + 1 < script->code.size() ? script->code[i + 1] : nullptr );
-            Instruction* next2 = ( i + 2 < script->code.size() ? script->code[i + 2] : nullptr );
+            Instruction* current = script.code[i];
+            Instruction* next = ( i + 1 < script.code.size() ? script.code[i + 1] : nullptr );
+            Instruction* next2 = ( i + 2 < script.code.size() ? script.code[i + 2] : nullptr );
 
             // pushc - drop
             // description:     Pushes a constant and drops it again immediately
@@ -122,11 +122,11 @@ namespace Helium
         }
     }
 
-    void Optimizer::optimizeWithStatistics( Script* script )
+    void Optimizer::optimizeWithStatistics(Module& script)
     {
-        unsigned lengthBefore = script->code.size();
+        unsigned lengthBefore = script.code.size();
         Helium::Optimizer::optimize( script );
-        unsigned lengthAfter = script->code.size();
+        unsigned lengthAfter = script.code.size();
 
         int lengthDiff = lengthBefore - lengthAfter;
 
