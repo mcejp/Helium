@@ -1,2 +1,2 @@
-if !${}
+if !has ${}
     throw 'unreachable code'

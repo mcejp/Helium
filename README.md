@@ -39,15 +39,10 @@ Simple! Using CMake:
 
 ### Implicit conversion rules
 
-- integer to boolean, real
-- real to boolean (TODO remove)
-- string to boolean (true, unless empty)
-- list to boolean (true)
-- object to boolean (true)
-- nativeFunction to boolean (true)
-- scriptFunction to boolean (true)
-- internal to boolean (true)
-- nil to boolean (false)
+- integer to real
+- note: no implicit conversions to bool
+    - use explicit comparison for `<value> != 0`, 0.0 and empty strings
+    - use `has <value>` to test against nil more succinctly
 
 ## Notes
 

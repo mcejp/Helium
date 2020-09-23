@@ -320,6 +320,7 @@ namespace Helium
         { "else",       Token_else },
         { "for",        Token_for },
         { "function",   Token_function },
+        { "has",        Token_has },
         { "if",         Token_if },
         { "in",         Token_in },
         { "infer",      Token_infer },

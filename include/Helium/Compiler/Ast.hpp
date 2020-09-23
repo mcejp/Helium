@@ -260,7 +260,7 @@ namespace Helium
     {
     public:
         enum class Type {
-            negation, not_,
+            has, negation, not_,
         };
 
         AstNodeUnaryExpr(Type type, pool_ptr<AstNodeExpression>&& right, SourceSpan span)
@@ -271,6 +271,7 @@ namespace Helium
 
         stx::string_view getSymbol() const {
             switch (type) {
+                case Type::has:         return "has";
                 case Type::negation:    return "-";
                 case Type::not_:        return "!";
             }

@@ -1289,6 +1289,12 @@ namespace Helium
                 auto unaryExpr = static_cast<const AstNodeUnaryExpr*>(node);
 
                 switch (unaryExpr->type) {
+                case AstNodeUnaryExpr::Type::has:
+                    pushExpression(unaryExpr->right.get());
+                    emit(Opcodes::pushnil, unaryExpr->span);
+                    emit(Opcodes::neq, unaryExpr->span);
+                    return true;
+
                 case AstNodeUnaryExpr::Type::negation: unaryOperator(Opcodes::neg, unaryExpr); return true;
                 case AstNodeUnaryExpr::Type::not_: unaryOperator(Opcodes::lnot, unaryExpr); return true;
                 }

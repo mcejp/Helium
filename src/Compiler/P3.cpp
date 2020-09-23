@@ -696,7 +696,17 @@ namespace Helium
     {
         accept( Token_plus );
 
-        if ( Token* tok = accept( Token_minus ) )
+        if ( Token* tok = accept( Token_has ) )
+        {
+            auto span = tok->span;
+            auto right = parsePlusMinusNotExpression();
+
+            if (!right)
+                syntaxError("Expected expression after 'has'");
+
+            return make_pooled<AstNodeUnaryExpr>(AstNodeUnaryExpr::Type::has, move(right), span);
+        }
+        else if ( Token* tok = accept( Token_minus ) )
         {
             auto span = tok->span;
             auto right = parsePlusMinusNotExpression();

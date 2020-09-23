@@ -59,6 +59,7 @@ namespace Helium
         Token_else,
         Token_for,
         Token_function,
+        Token_has,
         Token_if,
         Token_in,           // Added for A2010 (07.12.10)
         Token_infer,        // added for Brave (21.09.17)

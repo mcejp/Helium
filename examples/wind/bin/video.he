@@ -56,7 +56,7 @@ class Font {
             --print(surf);
 
     getGlyph(ch)
-        if !glyphs[ch]
+        if !has glyphs[ch]
             glyphs[ch] = drv.ttf.renderGlyphBlended(font, ch, 255, 255, 255, 255);
             return glyphs[ch];
 
@@ -83,7 +83,7 @@ class SdlVideoDriver {
         while true
             event = sdl.pollEvent();
 
-            if !event
+            if !has event
                 return;
 
             --print(event);
@@ -96,14 +96,14 @@ class SdlVideoDriver {
 
     run()
         while true
-            if surf
+            if has surf
                 sdl.fillRect(surf, 0, 0, surf.w, surf.h, #ffe0e0e0);
                 this.wm.drawAll();
 
-            if window
+            if has window
                 this.handleEvents();
 
-            if surf
+            if has surf
                 sdl.updateWindowSurface(window);
 
             _global.self_ctx.suspend();

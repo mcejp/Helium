@@ -15,37 +15,16 @@ namespace Helium
     bool RuntimeFunctions::asBoolean(Value value, bool* value_out, bool raiseIfInvalid) {
         helium_assert_debug(ActivationContext::getCurrentOrNull() != nullptr);
 
-        switch ( value.type ) {
-        case ValueType::invalid:
-            helium_abort_expression(value.type != ValueType::invalid);
-
-        case ValueType::nil:
-            *value_out = false;
-            return true;
-
-        case ValueType::boolean:
+        if (value.type == ValueType::boolean) {
             *value_out = value.booleanValue;
             return true;
+        }
+        else {
+            if (raiseIfInvalid) {
+                raiseException("Value cannot be implicitly converted to boolean");
+            }
 
-        case ValueType::integer:
-            *value_out = value.integerValue != 0;
-            return true;
-
-        case ValueType::real:
-            *value_out = value.realValue != 0.0;
-            return true;
-
-        case ValueType::internal:
-        case ValueType::list:
-        case ValueType::nativeFunction:
-        case ValueType::object:
-        case ValueType::scriptFunction:
-            *value_out = true;
-            return true;
-
-        case ValueType::string:
-            *value_out = value.length > 0;
-            return true;
+            return false;
         }
     }
 

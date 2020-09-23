@@ -19,7 +19,7 @@ class TestRunner {
             print(test);
             script = this.tryCompileTest(test);
 
-            if script
+            if has script
                 module = vm.loadModule(script);
 
                 ctx = ActivationContext(vm);
@@ -39,7 +39,7 @@ class TestRunner {
             print(test);
             script = this.tryCompileTest(test);
 
-            if script
+            if has script
                 module = vm.loadModule(script);
 
                 ctx = ActivationContext(vm);
