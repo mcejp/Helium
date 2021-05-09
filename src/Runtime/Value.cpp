@@ -108,6 +108,8 @@ namespace Helium
             case ValueType::scriptFunction:
                 return newScriptFunction( getScriptFunctionModuleIndex(), functionIndex );
         }
+
+        helium_unreachable();
     }
 
     void Value::release()

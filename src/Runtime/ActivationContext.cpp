@@ -112,6 +112,8 @@ namespace Helium
             return true;
         }
         }
+
+        helium_unreachable();
     }
 
     ActivationContext& ActivationContext::getCurrent() {
@@ -170,10 +172,10 @@ namespace Helium
             if (!NativeListFunctions::newList(5, &stacktrace))
                 return;
 
-            this->walkStack([&stacktrace, this](InstructionOrigin *origin) {
-                const auto &function = *origin->function.get();
-                const auto &unit = *origin->unit.get();
-                auto str = function + " (" + unit + ":" + std::to_string(origin->line) + ")";
+            this->walkStack([&stacktrace, this](InstructionOrigin const& origin) {
+                const auto &function = *origin.function;
+                const auto &unit = *origin.unit;
+                auto str = function + " (" + unit + ":" + std::to_string(origin.line) + ")";
                 ValueRef entry(Value::newStringWithLength(str.c_str(), str.size()));
 
                 // Might raise OOM exception. Tough shit.
@@ -198,26 +200,26 @@ namespace Helium
         return prev;
     }
 
-    void ActivationContext::walkStack(std::function<void(InstructionOrigin*)> callback) {
+    void ActivationContext::walkStack(std::function<void(InstructionOrigin const&)> const& callback) {
         for (auto it = frames.rbegin(); it != frames.rend(); it++) {
             // Current frame? Fetch instruction from activeModule
             // TODO: Why is this a special case?
             if (&(*it) == frame) {
                 // Dangerous
-                Instruction* next = &this->activeModule->instructions[this->pc - 1];
+                Instruction const* next = &this->activeModule->instructions[this->pc - 1];
 
                 if (next && next->origin) {
-                    callback(next->origin);
+                    callback(*next->origin);
                     continue;
                 }
             }
 
             // Previous frame? Fetch instruction from its module.
             // Also dangerous
-            Instruction* next = &(*it).module->instructions[(*it).pc - 1];
+            Instruction const* next = &(*it).module->instructions[(*it).pc - 1];
 
             if (next && next->origin) {
-                callback(next->origin);
+                callback(*next->origin);
                 continue;
             }
         }

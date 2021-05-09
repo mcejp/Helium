@@ -37,6 +37,8 @@ namespace Helium
                 RuntimeFunctions::raiseException("Attempting to overwrite a read-only property");
                 return false;
         }
+
+        helium_unreachable();
     }
 
     bool NativeObjectFunctions::setProperty(Value object, const char* name, ValueRef&& value, bool readOnly) {

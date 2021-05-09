@@ -87,6 +87,8 @@ namespace Helium
                 case Type::or_:         return "||";
                 case Type::subtract:    return "-";
             }
+
+            helium_unreachable();
         }
 
         const Type binaryExprType;

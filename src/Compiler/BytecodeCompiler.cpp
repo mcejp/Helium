@@ -69,6 +69,8 @@ namespace Helium
                 return ValueRef::makeStringWithLength(string->text.c_str(), string->text.size());
             }
         }
+
+        helium_unreachable();
     }
 
     struct Function
@@ -289,9 +291,9 @@ namespace Helium
             return temporaryStrings.size() - 1;
         }
 
-        static bool isGlobal( const AstNodeExpression* node )
+        static bool isGlobal(AstNodeExpression const& node)
         {
-            return node->type == AstNodeExpression::Type::identifier && static_cast<const AstNodeIdent*>( node )->name == "_global";
+            return node.type == AstNodeExpression::Type::identifier && static_cast<AstNodeIdent const&>( node ).name == "_global";
         }
 
         bool isMember( const char* name )
@@ -351,12 +353,12 @@ namespace Helium
             return 0;
         }
 
-        void binaryOperator( Opcodes::Opcode opcode, const AstNodeBinaryExpr* expr );
+        void binaryOperator(Opcodes::Opcode opcode, AstNodeBinaryExpr const& expr);
         void compileClass(AstNodeClass* classDecl);
         void cook();
         void linearize( AstNodeScript& tree );
         Type* maybeGetType(AstNodeTypeName* maybeTypeName);
-        void unaryOperator( Opcodes::Opcode opcode, const AstNodeUnaryExpr* expr );
+        void unaryOperator(Opcodes::Opcode opcode, AstNodeUnaryExpr const& expr);
 
         // New-style stuff
 
@@ -434,7 +436,7 @@ namespace Helium
          * @param maybeType_out
          * @return
          */
-        bool tryResolveLocalVariable(const AstNodeExpression* expression, LocalIndex_t* index_out, Type** maybeType_out);
+        bool tryResolveLocalVariable(AstNodeExpression const& expression, LocalIndex_t* index_out, Type** maybeType_out);
 
         bool compileStatement(const AstNodeStatement* node);
 
@@ -508,11 +510,11 @@ namespace Helium
         return std::find( arguments.begin(), arguments.end(), name ) != arguments.end();
     }
 
-    void AssemblerState::binaryOperator( Opcodes::Opcode opcode, const AstNodeBinaryExpr* expr )
+    void AssemblerState::binaryOperator(Opcodes::Opcode opcode, AstNodeBinaryExpr const& expr)
     {
-        pushExpression(expr->getLeft());
-        pushExpression(expr->getRight());
-        emit(opcode, expr->span);
+        pushExpression(expr.getLeft());
+        pushExpression(expr.getRight());
+        emit(opcode, expr.span);
     }
 
     bool AssemblerState::compileStatement(const AstNodeStatement* node) {
@@ -528,14 +530,14 @@ namespace Helium
 
             case AstNodeStatement::Type::assignment: {
                 auto assignment = static_cast<const AstNodeAssignment*>(node);
-                auto target = assignment->getTarget();
+                auto& target = *assignment->getTarget();
                 auto expr = assignment->getExpression();
                 auto location = assignment->span;
 
                 //* Only local variables, list items and variable members can be stored to!
-                if ( target->type != AstNodeExpression::Type::identifier
-                     && target->type != AstNodeExpression::Type::indexed
-                     && target->type != AstNodeExpression::Type::property ) {
+                if ( target.type != AstNodeExpression::Type::identifier
+                     && target.type != AstNodeExpression::Type::indexed
+                     && target.type != AstNodeExpression::Type::property ) {
                     raiseError("Expected local variable, list item or variable member at left side of assignment", assignment->span);
                     return false;
                 }
@@ -575,7 +577,7 @@ namespace Helium
 
                 //* Build the expression and store it.
                 pushExpression(assignment->getExpression());
-                popExpression(target, false);
+                popExpression(&target, false);
                 break;
             }
 
@@ -964,7 +966,7 @@ namespace Helium
         }
 
         case AstNodeExpression::Type::identifier: {
-            auto identifier = static_cast<const AstNodeIdent*>(node);
+            auto& identifier = static_cast<AstNodeIdent const&>(*node);
 
             if (isGlobal(identifier)) {
                 break;
@@ -1006,7 +1008,7 @@ namespace Helium
     bool AssemblerState::popExpression(const AstNodeExpression* node, bool keepOnStack) {
         switch (node->type) {
             case AstNodeExpression::Type::identifier: {
-                auto identifier = static_cast<const AstNodeIdent*>(node);
+                auto& identifier = static_cast<AstNodeIdent const&>(*node);
 
                 helium_assert(!isGlobal(identifier));
 
@@ -1015,14 +1017,14 @@ namespace Helium
                 }
 
                 // FIXME: DRY
-                bool forceLocal = (identifier->ns == AstNodeIdent::Namespace::local) || currentFunction->isArgument( identifier->name.c_str() );
+                bool forceLocal = (identifier.ns == AstNodeIdent::Namespace::local) || currentFunction->isArgument( identifier.name.c_str() );
 
-                if ( !forceLocal && isMember( identifier->name.c_str() ) ) {
+                if ( !forceLocal && isMember( identifier.name.c_str() ) ) {
                     emitLocal(Opcodes::getLocal, LOCAL_THIS, node->span);
-                    emitString(Opcodes::setMember, identifier->name.c_str(), node->span);
+                    emitString(Opcodes::setMember, identifier.name.c_str(), node->span);
                 }
                 else {
-                    emitLocal(Opcodes::setLocal, currentFunction->getOrAllocLocalIndex(identifier->name.c_str()), node->span);
+                    emitLocal(Opcodes::setLocal, currentFunction->getOrAllocLocalIndex(identifier.name.c_str()), node->span);
                 }
 
                 break;
@@ -1092,11 +1094,14 @@ namespace Helium
 
     // Compute excepression and push it to the top of the stack
     bool AssemblerState::evaluateExpressionBasic(const AstNodeExpression* node) {
+        helium_assert_debug(node != nullptr);
+
         switch (node->type) {
             case AstNodeExpression::Type::binaryExpr: {
-                auto binaryExpr = static_cast<const AstNodeBinaryExpr*>(node);
+                auto& binaryExpr = static_cast<AstNodeBinaryExpr const&>(*node);
 
-                switch (binaryExpr->binaryExprType) {
+                // TODO: Factor out getOpcodeForBinaryExprType
+                switch (binaryExpr.binaryExprType) {
                 case AstNodeBinaryExpr::Type::add: binaryOperator(Opcodes::op_add, binaryExpr); return true;
                 case AstNodeBinaryExpr::Type::divide: binaryOperator(Opcodes::op_div, binaryExpr); return true;
                 case AstNodeBinaryExpr::Type::modulo: binaryOperator(Opcodes::op_mod, binaryExpr); return true;
@@ -1115,7 +1120,7 @@ namespace Helium
                 case AstNodeBinaryExpr::Type::notEquals: binaryOperator(Opcodes::neq, binaryExpr); return true;
                 }
 
-                break;
+                helium_unreachable();
             }
 
             case AstNodeExpression::Type::call:
@@ -1213,7 +1218,7 @@ namespace Helium
             }
 
             case AstNodeExpression::Type::identifier: {
-                auto identifier = static_cast<const AstNodeIdent*>(node);
+                auto& identifier = static_cast<AstNodeIdent const&>(*node);
 
                 if (isGlobal(identifier)) {
                     emit(Opcodes::pushglobal, node->span);
@@ -1221,17 +1226,17 @@ namespace Helium
                 }
 
                 // FIXME: DRY
-                bool forceLocal = (identifier->ns == AstNodeIdent::Namespace::local) || currentFunction->isArgument( identifier->name.c_str() );
+                bool forceLocal = (identifier.ns == AstNodeIdent::Namespace::local) || currentFunction->isArgument( identifier.name.c_str() );
 
-                if ( !forceLocal && isMember( identifier->name.c_str() ) )
+                if ( !forceLocal && isMember( identifier.name.c_str() ) )
                 {
                     // Get value of class member
                     emitLocal(Opcodes::getLocal, LOCAL_THIS, node->span);
-                    emitString(Opcodes::getProperty, identifier->name.c_str(), node->span);
+                    emitString(Opcodes::getProperty, identifier.name.c_str(), node->span);
                 }
                 else
                 {
-                    add( Opcodes::unknownPush, node->span )->stringIndex = getTemporaryStringIndex(identifier->name.c_str());
+                    add( Opcodes::unknownPush, node->span )->stringIndex = getTemporaryStringIndex(identifier.name.c_str());
                     unknownPushFuncPtrs.push_back( currentFunction );
                 }
 
@@ -1286,13 +1291,13 @@ namespace Helium
             }
 
             case AstNodeExpression::Type::unaryExpr: {
-                auto unaryExpr = static_cast<const AstNodeUnaryExpr*>(node);
+                auto& unaryExpr = static_cast<AstNodeUnaryExpr const&>(*node);
 
-                switch (unaryExpr->type) {
+                switch (unaryExpr.type) {
                 case AstNodeUnaryExpr::Type::has:
-                    pushExpression(unaryExpr->right.get());
-                    emit(Opcodes::pushnil, unaryExpr->span);
-                    emit(Opcodes::neq, unaryExpr->span);
+                    pushExpression(unaryExpr.right.get());
+                    emit(Opcodes::pushnil, unaryExpr.span);
+                    emit(Opcodes::neq, unaryExpr.span);
                     return true;
 
                 case AstNodeUnaryExpr::Type::negation: unaryOperator(Opcodes::neg, unaryExpr); return true;
@@ -1355,6 +1360,8 @@ namespace Helium
                 return true;
             }
         }
+
+        helium_unreachable();
     }
 
     bool AssemblerState::pushValue(ValueHandle vh, const SourceSpan& span) {
@@ -1378,18 +1385,18 @@ namespace Helium
         failed = true;
     }
 
-    bool AssemblerState::tryResolveLocalVariable(const AstNodeExpression* expression, LocalIndex_t* index_out, Type** maybeType_out) {
+    bool AssemblerState::tryResolveLocalVariable(AstNodeExpression const& expression, LocalIndex_t* index_out, Type** maybeType_out) {
         helium_assert_debug(currentFunction != nullptr);
 
-        if (expression->type == AstNodeExpression::Type::identifier) {
-            auto identifier = static_cast<const AstNodeIdent*>(expression);
+        if (expression.type == AstNodeExpression::Type::identifier) {
+            auto& identifier = static_cast<const AstNodeIdent&>(expression);
 
             // FIXME: DRY
-            bool forceLocal = (identifier->ns == AstNodeIdent::Namespace::local) ||
-                              currentFunction->isArgument(identifier->name.c_str());
+            bool forceLocal = (identifier.ns == AstNodeIdent::Namespace::local) ||
+                              currentFunction->isArgument(identifier.name.c_str());
 
             if (forceLocal) {
-                auto index = currentFunction->getOrAllocLocalIndex(identifier->name.c_str());
+                auto index = currentFunction->getOrAllocLocalIndex(identifier.name.c_str());
                 *index_out = index;
                 *maybeType_out = currentFunction->locals[index].maybeType;
                 return true;
@@ -1399,10 +1406,10 @@ namespace Helium
         return false;
     }
 
-    void AssemblerState::unaryOperator( Opcodes::Opcode opcode, const AstNodeUnaryExpr* expr )
+    void AssemblerState::unaryOperator(Opcodes::Opcode opcode, AstNodeUnaryExpr const& expr)
     {
-        pushExpression(expr->right.get());
-        emit(opcode, expr->span);
+        pushExpression(expr.right.get());
+        emit(opcode, expr.span);
     }
 
     void AssemblerState::linearize( AstNodeScript& tree )

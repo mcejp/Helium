@@ -122,7 +122,7 @@ namespace Helium
             void raiseException(ValueRef&& val);
             void raiseOutOfMemoryException(const char* where);
 
-            void walkStack(std::function<void(InstructionOrigin*)> callback);
+            void walkStack(std::function<void(InstructionOrigin const&)> const& callback);
 
         private:
             bool enterFunction(const ScriptFunction& function, size_t numArgs);

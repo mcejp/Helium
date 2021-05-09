@@ -25,7 +25,7 @@ namespace {
     static std::unordered_map<std::string, NativeFunction> stringMethods;
 
     // How many Possible Cycle Roots are needed to trigger a collect cycle
-    inline auto GC_NUM_POSSIBLE_ROOTS_THRESHOLD = 1000;
+    inline size_t GC_NUM_POSSIBLE_ROOTS_THRESHOLD = 1000;
 }
 
     using std::move;
@@ -871,6 +871,6 @@ namespace Helium
                 return "vmShutdown";
         }
 
-        helium_abort_expression(gcReason != gcReason);
+        helium_unreachable();
     }
 }
