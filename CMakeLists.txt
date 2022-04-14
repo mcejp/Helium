@@ -31,6 +31,7 @@ set(HEADER_FILES
         include/Helium/Runtime/Code.hpp
         include/Helium/Runtime/Hash.hpp
         include/Helium/Runtime/InlineStack.hpp
+        include/Helium/Runtime/Metaclass.hpp
         include/Helium/Runtime/NativeListFunctions.hpp
         include/Helium/Runtime/RuntimeFunctions.hpp
         include/Helium/Runtime/NativeObjectFunctions.hpp
