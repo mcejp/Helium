@@ -19,17 +19,6 @@ namespace Helium
     using std::string;
     using stx::optional;
 
-    struct ValueHandle {
-        Type* maybeType;
-
-        int maybeLocalIndex;
-
-        static ValueHandle stackTop() { return ValueHandle{ nullptr, -1 }; }
-    };
-
-    static bool isStackTop(ValueHandle vh) { return vh.maybeType == nullptr && vh.maybeLocalIndex == -1; }
-    static bool isInt(ValueHandle vh) { return vh.maybeType && vh.maybeType->isInt(); }
-
     static ValueRef getConstant(const AstNodeLiteral* literal)
     {
         switch ( literal->literalType )
@@ -313,27 +302,11 @@ namespace Helium
         // New-style stuff
 
         /**
-         * Throw away the value referred to by \p vh. This removes the value from stack and/or calls releaseExpression
-         * @param vh
-         * @param span
-         * @return true on success, false on error
-         */
-        bool dropValue(ValueHandle vh, const SourceSpan& span);
-
-        /**
-         * Evaluate an Expression node and put the result in its natural location
-         * (for general case, falls back to evaluateExpressionBasic and evaluating on stack)
-         * @param node
-         * @return ValueHandle on success, empty on error
-         */
-        optional<ValueHandle> evaluateExpression(const AstNodeExpression* node);
-
-        /**
          * Evaluate an Expression using stack operations
          * @param node
          * @return true on success, false on error
          */
-        bool evaluateExpressionBasic(const AstNodeExpression* node);
+        bool pushExpression(const AstNodeExpression* node);
 
         /**
          * Store the stack top into an Expression node
@@ -344,55 +317,16 @@ namespace Helium
         bool popExpression(const AstNodeExpression* node, bool keepOnStack);
 
         /**
-         * Pop a stack value into a local variable
-         * @param index
-         * @param span
-         */
-        void popLocal(LocalIndex_t index, const SourceSpan& span);
-
-        /**
-         * Evaluate an Expression and make sure the final result is on top of the stack
-         * @param node
-         * @return true on success, false on error
-         */
-        bool pushExpression(const AstNodeExpression* node);
-
-        /**
          * Push a literal value to the stack
          * @param node
          * @return true on success, false on error
          */
         bool pushLiteral(const AstNodeLiteral* node);
 
-        /**
-         * Push the value referred to by \p vh to the stack
-         * @param vh
-         * @param span
-         * @return true on success, false on error
-         */
-        bool pushValue(ValueHandle vh, const SourceSpan& span);
-
-        /**
-         * Release the memory location occupied by \p vh
-         * @param vh
-         * @return true on success, false on error
-         */
-        bool releaseExpression(ValueHandle vh) { return true; }
-
-        /**
-         * Find out if the specified expression is a local variable and if it is, return the relevant information
-         * @param expression
-         * @param index_out
-         * @param maybeType_out
-         * @return
-         */
-        bool tryResolveLocalVariable(AstNodeExpression const& expression, LocalIndex_t* index_out, Type** maybeType_out);
-
         bool compileStatement(const AstNodeStatement* node);
 
         // Errors
         void raiseError(const char* message, const SourceSpan& span);
-        void operandTypeError(const AstNodeBinaryExpr* operation, Type* maybeType1, Type* maybeType2);
         void typeError1() { abort(); }
 
     private:
@@ -789,30 +723,6 @@ namespace Helium
         return true;
     }
 
-    bool AssemblerState::dropValue(ValueHandle vh, const SourceSpan& span) {
-        if (vh.maybeType == nullptr) {
-            // value is dynamic, and it's necessarily already on the stack
-            // FIXME: this shouldn't be an equivalency
-
-            emit(Opcodes::drop, span);
-            return true;
-        }
-
-        releaseExpression(vh);
-        return true;
-    }
-
-    optional<ValueHandle> AssemblerState::evaluateExpression(const AstNodeExpression* node) {
-        evaluateExpressionBasic(node);
-        return ValueHandle::stackTop();
-    }
-
-    void AssemblerState::operandTypeError(const AstNodeBinaryExpr* operation, Type* maybeType1, Type* maybeType2) {
-        auto message = string("Invalid operands to '") + string(operation->getSymbol()) + "' - " + Type::toString(maybeType1) + ", " + Type::toString(maybeType2);
-
-        raiseError(message.c_str(), operation->span);
-    }
-
     bool AssemblerState::popExpression(const AstNodeExpression* node, bool keepOnStack) {
         switch (node->type) {
             case AstNodeExpression::Type::identifier: {
@@ -883,20 +793,8 @@ namespace Helium
         return true;
     }
 
-    void AssemblerState::popLocal(LocalIndex_t index, const SourceSpan& span) {
-        helium_assert_debug(currentFunction != nullptr);
-
-        auto& local = currentFunction->locals[index];
-
-        if (local.maybeType == nullptr) {
-            emitLocal(Opcodes::setLocal, index, span);
-        }
-        else
-            helium_assert(false);
-    }
-
-    // Compute excepression and push it to the top of the stack
-    bool AssemblerState::evaluateExpressionBasic(const AstNodeExpression* node) {
+    // Compute expression and push it to the top of the stack
+    bool AssemblerState::pushExpression(const AstNodeExpression* node) {
         helium_assert_debug(node != nullptr);
 
         switch (node->type) {
@@ -1114,15 +1012,6 @@ namespace Helium
         return true;
     }
 
-    bool AssemblerState::pushExpression(const AstNodeExpression* node) {
-        auto vh = evaluateExpression(node);
-
-        if (!vh || !pushValue(*vh, node->span) || !releaseExpression(*vh))
-            return false;
-
-        return true;
-    }
-
     // Compute excepression and push it to the top of the stack
     bool AssemblerState::pushLiteral(const AstNodeLiteral* node) {
         switch (node->literalType) {
@@ -1167,39 +1056,10 @@ namespace Helium
         helium_unreachable();
     }
 
-    bool AssemblerState::pushValue(ValueHandle vh, const SourceSpan& span) {
-        // value is already on the stack
-        if (isStackTop(vh))
-            return true;
-
-        helium_assert(false);
-    }
-
     void AssemblerState::raiseError(const char* message, const SourceSpan& span) {
         printf("%s:%i: error: %s\n", this->unitNameString->c_str(), span.start.line, message);
 
         failed = true;
-    }
-
-    bool AssemblerState::tryResolveLocalVariable(AstNodeExpression const& expression, LocalIndex_t* index_out, Type** maybeType_out) {
-        helium_assert_debug(currentFunction != nullptr);
-
-        if (expression.type == AstNodeExpression::Type::identifier) {
-            auto& identifier = static_cast<const AstNodeIdent&>(expression);
-
-            // FIXME: DRY
-            bool forceLocal = (identifier.ns == AstNodeIdent::Namespace::local) ||
-                              currentFunction->isArgument(identifier.name.c_str());
-
-            if (forceLocal) {
-                auto index = currentFunction->getOrAllocLocalIndex(identifier.name.c_str());
-                *index_out = index;
-                *maybeType_out = currentFunction->locals[index].maybeType;
-                return true;
-            }
-        }
-
-        return false;
     }
 
     void AssemblerState::unaryOperator(Opcodes::Opcode opcode, AstNodeUnaryExpr const& expr)
