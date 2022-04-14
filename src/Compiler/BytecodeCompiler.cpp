@@ -24,15 +24,7 @@ namespace Helium
 
         int maybeLocalIndex;
 
-#ifdef HELIUM_MIXED_MODE
-        uint16_t reg;
-#endif
-
         static ValueHandle stackTop() { return ValueHandle{ nullptr, -1 }; }
-
-#ifdef HELIUM_MIXED_MODE
-        static ValueHandle inReg(Type* type, uint16_t reg) { return ValueHandle{ type, -1, reg }; }
-#endif
     };
 
     static bool isStackTop(ValueHandle vh) { return vh.maybeType == nullptr && vh.maybeLocalIndex == -1; }
@@ -79,10 +71,6 @@ namespace Helium
             const char* name;
             Type* maybeType;
 
-#ifdef HELIUM_MIXED_MODE
-            int16_t reg = -1;
-#endif
-
             Local(const char* name, Type* maybeType) : name(name), maybeType(maybeType) {}
         };
 
@@ -101,10 +89,6 @@ namespace Helium
 
         pool_ptr<AstNodeFunction> functionOwning;
 
-#ifdef HELIUM_MIXED_MODE
-        uint16_t registersInUse = 0;
-#endif
-
         Function();
 
         LocalIndex_t createLocal(const char* name, Type* maybeType);
@@ -113,11 +97,6 @@ namespace Helium
 
         void addArgument( const char* name );
         bool isArgument( const char* name );
-
-#ifdef HELIUM_MIXED_MODE
-        uint16_t allocRegister() { return registersInUse++; }
-        uint16_t getRegisterForLocal(LocalIndex_t index);
-#endif
     };
 
     struct AssemblerState
@@ -209,35 +188,6 @@ namespace Helium
             instr->realValue = realValue;
             return instr;
         }
-
-#ifdef HELIUM_MIXED_MODE
-        void emitReg1(Opcodes::Opcode opcode, int r0, const SourceSpan& span)
-        {
-            helium_assert_debug(InstructionDesc::getByOpcode(opcode)->operandType == OperandType::reg1);
-
-            auto instr = add(opcode, span);
-            instr->reg.r0 = r0;
-        }
-
-        void emitReg2(Opcodes::Opcode opcode, int r0, int r1, const SourceSpan& span)
-        {
-            helium_assert_debug(InstructionDesc::getByOpcode(opcode)->operandType == OperandType::reg2);
-
-            auto instr = add(opcode, span);
-            instr->reg.r0 = r0;
-            instr->reg.r1 = r1;
-        }
-
-        void emitReg3(Opcodes::Opcode opcode, int r0, int r1, int r2, const SourceSpan& span)
-        {
-            helium_assert_debug(InstructionDesc::getByOpcode(opcode)->operandType == OperandType::reg3);
-
-            auto instr = add(opcode, span);
-            instr->reg.r0 = r0;
-            instr->reg.r1 = r1;
-            instr->reg.r2 = r2;
-        }
-#endif
 
         Instruction* emitString(Opcodes::Opcode opcode, const char* string, const SourceSpan& span)
         {
@@ -490,21 +440,6 @@ namespace Helium
         return {};
     }
 
-#ifdef HELIUM_MIXED_MODE
-    uint16_t Function::getRegisterForLocal(LocalIndex_t index) {
-        auto& local = locals[index];
-
-        // FIXME: check type
-
-        if (local.reg < 0) {
-            // FIXME: check required size
-            local.reg = allocRegister();
-        }
-
-        return local.reg;
-    }
-#endif
-
     bool Function::isArgument( const char* name )
     {
         return std::find( arguments.begin(), arguments.end(), name ) != arguments.end();
@@ -541,39 +476,6 @@ namespace Helium
                     raiseError("Expected local variable, list item or variable member at left side of assignment", assignment->span);
                     return false;
                 }
-
-#ifdef HELIUM_MIXED_MODE
-                LocalIndex_t index;
-                Type* maybeType;
-
-                if (tryResolveLocalVariable(target, &index, &maybeType)) {
-                    optional<ValueHandle> vh = evaluateExpression(expr);
-
-                    // Evaluate the expression to assign
-                    if (!vh)
-                        return false;
-
-                    if (maybeType == vh->maybeType && isInt(maybeType)) {
-                        auto srcRegister = vh->reg;      // FIXME: can we assume this?
-                        auto destRegister = currentFunction->getRegisterForLocal(index);
-
-                        emitReg2(Opcodes::mov_i, destRegister, srcRegister, expr->span);
-
-                        releaseExpression(*vh);
-                        return true;
-                    }
-                    else {
-                        // Generic assignment -- go through the stack
-
-                        if (!pushValue(*vh, location))
-                            return false;
-
-                        popLocal(index, location);
-                        releaseExpression(*vh);
-                        return true;
-                    }
-                }
-#endif
 
                 //* Build the expression and store it.
                 pushExpression(assignment->getExpression());
@@ -901,100 +803,6 @@ namespace Helium
     }
 
     optional<ValueHandle> AssemblerState::evaluateExpression(const AstNodeExpression* node) {
-        switch (node->type) {
-#ifdef HELIUM_MIXED_MODE
-        case AstNodeExpression::Type::binaryExpr: {
-            auto binaryExpr = static_cast<const AstNodeBinaryExpr*>(node);
-
-            // Only 'add' is currently supported -- bail out for others
-            if (binaryExpr->binaryExprType != AstNodeBinaryExpr::Type::add)
-                break;
-
-            optional<ValueHandle> left = evaluateExpression(binaryExpr->getLeft());
-
-            if (!left)
-                return {};
-
-            // left is dynamic
-            if (isStackTop(*left)) {
-                pushExpression(binaryExpr->getRight());
-                emit(Opcodes::op_add, binaryExpr->span);
-                return ValueHandle::stackTop();
-            }
-
-            // left is Int
-            if (isInt(*left)) {
-                optional<ValueHandle> right = evaluateExpression(binaryExpr->getRight());
-
-                if (!right)
-                    return {};
-
-                if (isInt(*right)) {
-                    auto vh = ValueHandle::inReg(Type::builtinInt(), currentFunction->allocRegister());
-                    emitReg3(Opcodes::add_i, vh.reg, left->reg, right->reg, node->span);
-                    releaseExpression(*left);
-                    releaseExpression(*right);
-                    return vh;
-                }
-                else {
-                    operandTypeError(binaryExpr, left->maybeType, right->maybeType);
-                    return {};
-                }
-            }
-
-            helium_assert(false);
-
-            //if (left->maybeType != right.maybeType)
-            //    typeError1();
-
-            return {};
-        }
-
-        case AstNodeExpression::Type::literal: {
-            auto literal = static_cast<const AstNodeLiteral*>(node);
-
-            // Only integer literals are currently supported -- bail out for others
-            if (literal->literalType != AstNodeLiteral::Type::integer)
-                break;
-
-            auto integer = static_cast<const AstNodeLiteralInteger*>(literal);
-            emitInteger(Opcodes::pushc_i, integer->value, node->span);
-
-            //vh_out = ValueHandle::inReg(Type::builtinInt(), currentFunction->allocRegister());
-            //emitReg1(Opcodes::pop_i, vh_out.reg, node->line);
-            return ValueHandle::stackTop();
-        }
-
-        case AstNodeExpression::Type::identifier: {
-            auto& identifier = static_cast<AstNodeIdent const&>(*node);
-
-            if (isGlobal(identifier)) {
-                break;
-            }
-
-            LocalIndex_t index;
-            Type* maybeType;
-
-            if (tryResolveLocalVariable(identifier, &index, &maybeType)) {
-                auto location = node->span;     // FIXME
-
-                if (maybeType != nullptr) {
-                    auto type = maybeType;
-
-                    if (isInt(type)) {
-                        return ValueHandle::inReg(type, currentFunction->getRegisterForLocal(index));
-                    }
-                }
-            }
-
-            break;
-        }
-#endif
-
-        default:
-            ;
-        }
-
         evaluateExpressionBasic(node);
         return ValueHandle::stackTop();
     }
@@ -1083,11 +891,6 @@ namespace Helium
         if (local.maybeType == nullptr) {
             emitLocal(Opcodes::setLocal, index, span);
         }
-#ifdef HELIUM_MIXED_MODE
-        else if (isInt(local.maybeType)) {
-            emitReg1(Opcodes::pop_i, currentFunction->getRegisterForLocal(index), span);
-        }
-#endif
         else
             helium_assert(false);
     }
@@ -1369,13 +1172,6 @@ namespace Helium
         if (isStackTop(vh))
             return true;
 
-#ifdef HELIUM_MIXED_MODE
-        if (isInt(vh.maybeType)) {
-            emitReg1(Opcodes::push_i, vh.reg, span);
-            return true;
-        }
-#endif
-
         helium_assert(false);
     }
 
@@ -1473,16 +1269,7 @@ namespace Helium
                     currentFunction->addArgument(argName);
                     auto index = currentFunction->createLocal(argName, maybeGetType(decl.type.get()));
 
-#ifdef HELIUM_MIXED_MODE
-                    // If needed, convert arg to native type
-                    if (currentFunction->locals[index].maybeType != nullptr) {
-                        auto line = currentFunction->function->span;
-                        emitLocal(Opcodes::getLocal, index, line);
-                        popLocal(index, line);
-                    }
-#else
                     // TODO: argument type checking
-#endif
                 }
             /*}
 			else if ( parameters->type == AstNodeType::symbol )

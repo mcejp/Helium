@@ -88,15 +88,6 @@ namespace Helium
             new_list,   // create a list from top values on the stack
             new_obj,    // create a new empty object
 
-#ifdef HELIUM_MIXED_MODE
-            push_i,             // push.i r1
-
-            pop_i,              // pop.i r1
-
-            mov_i,              // mov.i r1, r2
-            add_i,              // add.i r1, r2, r3
-#endif
-
             numValidOpcodes,
 
             // Special (valid only during compilation)
@@ -128,12 +119,6 @@ namespace Helium
         real,
         string,
         switchTable,
-
-#ifdef HELIUM_MIXED_MODE
-        reg1,
-        reg2,
-        reg3,
-#endif
     };
 
     struct InstructionDesc

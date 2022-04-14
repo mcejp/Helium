@@ -217,12 +217,6 @@ namespace Helium
         if (!wrapNewDelete(new Compiler(), &object))
             return;
 
-#ifdef HELIUM_MIXED_MODE
-        NativeObjectFunctions::setProperty(object, "isMixedMode", ValueRef::makeBoolean(true), true);
-#else
-        NativeObjectFunctions::setProperty(object, "isMixedMode", ValueRef::makeBoolean(false), true);
-#endif
-
         ctx.setReturnValue(move(object));
     }
 

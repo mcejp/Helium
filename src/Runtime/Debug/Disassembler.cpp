@@ -145,23 +145,6 @@ namespace Helium
                     ss << " " << current->realValue;
                     break;
 
-#ifdef HELIUM_MIXED_MODE
-                case OperandType::reg1:
-                    snprintf(buffer, sizeof(buffer), " #%d", current->reg.r0);
-                    ss << buffer;
-                    break;
-
-                case OperandType::reg2:
-                    snprintf(buffer, sizeof(buffer), " #%d, #%d", current->reg.r0, current->reg.r1);
-                    ss << buffer;
-                    break;
-
-                case OperandType::reg3:
-                    snprintf(buffer, sizeof(buffer), " #%d, #%d, #%d", current->reg.r0, current->reg.r1, current->reg.r2);
-                    ss << buffer;
-                    break;
-#endif
-
                 case OperandType::string: {
                     ss << " " << current->stringIndex << "\t; '";
                     const auto& string = script.stringPool[current->stringIndex];

@@ -19,12 +19,6 @@ namespace Helium
 
     typedef unsigned int ModuleIndex_t;
 
-#ifdef HELIUM_MIXED_MODE
-    union Register {
-        Int_t int_;
-    };
-#endif
-
     // A stack frame. Always corresponds to a script function.
     struct Frame {
         const ScriptFunction* scriptFunction;
@@ -33,10 +27,6 @@ namespace Helium
 
         // FIXME: this needs to be fixed-size! (for perf)
         std::vector<ValueRef> locals;
-
-#ifdef HELIUM_MIXED_MODE
-        std::vector<Register> registers;
-#endif
 
         // These variables are cached in ActivationContext and only flushed on function calls!
         VMModule* module;
@@ -72,19 +62,6 @@ namespace Helium
             
             locals[index] = std::move(value);
         }
-
-#ifdef HELIUM_MIXED_MODE
-        Int_t getRegisterInt(size_t index) {
-            return registers[index].int_;
-        }
-
-        void setRegisterInt(size_t index, Int_t value) {
-            if (index >= registers.size())
-                registers.resize(index + 1);
-
-            registers[index].int_ = value;
-        }
-#endif
     };
 
     class ActivationContext {

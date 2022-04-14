@@ -60,13 +60,6 @@ static const InstructionDesc descs[] = {
     {Opcodes::assert,       "assert",       OperandType::string},
     {Opcodes::new_list,     "new.list",     OperandType::integer},
     {Opcodes::new_obj,      "new.obj",      OperandType::none},
-
-#ifdef HELIUM_MIXED_MODE
-    {Opcodes::push_i,       "push.i",       OperandType::reg1},
-    {Opcodes::pop_i,        "pop.i",        OperandType::reg1},
-    {Opcodes::mov_i,        "mov.i",        OperandType::reg2},
-    {Opcodes::add_i,        "add.i",        OperandType::reg3},
-#endif
 };
 
 const InstructionDesc* InstructionDesc::getByOpcode(Opcode_t opcode) {

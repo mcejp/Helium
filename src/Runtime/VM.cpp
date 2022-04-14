@@ -605,30 +605,6 @@ namespace Helium
                     break;
                 }
 
-#ifdef HELIUM_MIXED_MODE
-                case Opcodes::add_i:
-                    // FIXME: detect integer overflow
-                    ctx.frame->setRegisterInt(next->reg.r0, ctx.frame->getRegisterInt(next->reg.r1) + ctx.frame->getRegisterInt(next->reg.r2));
-                    break;
-
-                case Opcodes::mov_i:
-                    ctx.frame->setRegisterInt(next->reg.r0, ctx.frame->getRegisterInt(next->reg.r1));
-                    break;
-
-                case Opcodes::pop_i: {
-                    ValueRef value = ctx.stack.pop();
-                    Int_t intValue;
-
-                    if (RuntimeFunctions::asInteger(value, &intValue, true))
-                        ctx.frame->setRegisterInt(next->reg.r0, intValue);
-                    break;
-                }
-
-                case Opcodes::push_i:
-                    ctx.stack.push(ValueRef::makeInteger(ctx.frame->getRegisterInt(next->reg.r0)));
-                    break;
-#endif
-
                 default:
                     helium_assert(next->opcode != next->opcode);
             }

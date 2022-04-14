@@ -41,11 +41,6 @@ class Kernel {
         compiler = Compiler();
         print('compiler version: ', compiler.getVersion());
 
-        if compiler.isMixedMode
-            print('compiler mode: mixed');
-        else
-            print('compiler mode: dynamic');
-
         vm = getVM();
 
     executeProcess(path)
