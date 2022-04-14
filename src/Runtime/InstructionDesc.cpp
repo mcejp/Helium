@@ -15,6 +15,8 @@ static const InstructionDesc descs[] = {
     {Opcodes::jmp_true,     "jmp.true",     OperandType::codeAddress},
     {Opcodes::jmp_false,    "jmp.false",    OperandType::codeAddress},
     {Opcodes::ret,          "ret",          OperandType::none},
+    {Opcodes::op_switch,    "switch",       OperandType::switchTable},
+    {Opcodes::throw_var,    "throw_var",    OperandType::none},
 
     {Opcodes::op_add,       "add",          OperandType::none,          2, 1},
     {Opcodes::op_div,       "div",          OperandType::none,          2, 1},
@@ -58,8 +60,6 @@ static const InstructionDesc descs[] = {
     {Opcodes::assert,       "assert",       OperandType::string},
     {Opcodes::new_list,     "new.list",     OperandType::integer},
     {Opcodes::new_obj,      "new.obj",      OperandType::none},
-    {Opcodes::op_switch,    "switch",       OperandType::switchTable},
-    {Opcodes::throw_var,    "throw_var",    OperandType::none},
 
 #ifdef HELIUM_MIXED_MODE
     {Opcodes::push_i,       "push.i",       OperandType::reg1},

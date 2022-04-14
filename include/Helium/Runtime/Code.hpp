@@ -28,10 +28,10 @@ namespace Helium
     {
         enum Opcode
         {
-            nop,
+            nop,        // no operation (not really used for anything either)
 
             // Flow control
-            args,       // push an argument count on the call stack
+            args,       // push an argument count on the call stack (unnecessary instruction that should be fused with call_*)
             call_func,  // call a function resolved at compile time
             call_var,   //* call a function referenced by a variable on the stack
             call_ext,   // call an external function
@@ -40,8 +40,10 @@ namespace Helium
             jmp_true,   // conditional jump
             jmp_false,  // conditional jump
             ret,        // return from a function
+            op_switch,  // optimized switch
+            throw_var,  // throw an exception
 
-            // Arithmetics
+            // Operators - Arithmetic
             op_add,
             op_div,
             op_mod,
@@ -49,13 +51,13 @@ namespace Helium
             neg,
             op_sub,
 
-            // Comparison
+            // Operators - Comparison
             eq, grtr, grtrEq, less, lessEq, neq,
 
-            // Logic operations
+            // Operators - Logic
             land, lnot, lor,
 
-            // Stack
+            // Stack manipulation
             pushnil,    // push nil
             pushc_b,    // push boolean literal
             pushc_f,    // push const float
@@ -79,12 +81,12 @@ namespace Helium
             getProperty,    // pop obj; push obj.{STRING}
             setMember,      // pop obj; pop obj.{STRING}
 
-            // Misc
+            // Operators - Misc
             assert,     //
+
+            // Operators - Object creation
             new_list,   // create a list from top values on the stack
             new_obj,    // create a new empty object
-            op_switch,  // optimized switch
-            throw_var,  // throw an exception
 
 #ifdef HELIUM_MIXED_MODE
             push_i,             // push.i r1
