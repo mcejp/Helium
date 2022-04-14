@@ -119,14 +119,13 @@ namespace Helium
 #endif
 
     Instruction::Instruction( const Instruction& other )
-            : opcode( other.opcode ), mode( other.mode ),
+            : opcode( other.opcode ),
               codeAddr( other.codeAddr ),
               functionIndex( other.functionIndex ),
               integer( other.integer ),
               realValue( other.realValue ),
               stringIndex( other.stringIndex ),
-              switchTableIndex( other.switchTableIndex ),
-              reg { other.reg.r0, other.reg.r1, other.reg.r2, other.reg.r3 }
+              switchTableIndex( other.switchTableIndex )
     {
         origin = other.origin ? new InstructionOrigin( other.origin ) : 0;
     }

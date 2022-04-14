@@ -151,11 +151,11 @@ namespace Helium
     using ReadCallback = std::function<size_t(span<std::byte>)>;
     using WriteCallback = std::function<size_t(span<const std::byte>)>;
 
+    // TODO: this structure is cache-awful, and should be completely redone (or disposed of)
     struct Instruction
     {
         // <8-byte header
         Opcode_t opcode;          // keep
-        uint16_t mode = 0;      // keep
         InstructionOrigin* origin = nullptr;    // move into another structure for cache reasons
 
         // 8-byte union
@@ -165,7 +165,6 @@ namespace Helium
         CodeAddr_t codeAddr;
         CodeAddr_t functionIndex;
         size_t stringIndex;                     // TODO: in loaded code, resolve to direct pointer
-        struct { uint16_t r0, r1, r2, r3; } reg;
 
         Instruction() = default;
         Instruction( const Instruction& other );
